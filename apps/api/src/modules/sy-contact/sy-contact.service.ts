@@ -2,6 +2,7 @@ import { HttpException, Injectable, InternalServerErrorException, Logger } from 
 import { PrismaService } from "src/core/prisma/prisma.service";
 import { getPreSignUrl } from "@repo/storage";
 import { config } from "@repo/config";
+import { ContactUpdateDto } from "./dto/sy-contact-update.dto";
 
 @Injectable()
 export class SyContactService {
@@ -38,4 +39,8 @@ export class SyContactService {
 			throw new InternalServerErrorException(e);
 		}
 	}
+
+	async getContactInfo(userId: string) {}
+
+	async updateContactInfo(userId: string, contactUpdateDto: ContactUpdateDto) {}
 }
