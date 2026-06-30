@@ -47,16 +47,28 @@ model FirstYearQuest {
   updated_at        DateTime              @updatedAt
 }
 
+model SecondYearUserAndUserJoiner {
+  id                      Int @id @default(autoincrement())
+  syuser_email            String          
+  syuser                  SecondYearUser   @relation(fields: [syuser_email], references: [syuser_email])       
+  user_email              String          
+  user                    User            @relation(fields: [user_email], references: [email])
+
+  created_at              DateTime        @default(now())
+  updated_at              DateTime        @updatedAt
+}
+
 model SecondYearUser {
   syuser_uuid       String                @id @default(uuid())
   syuser_id         String                @unique
   syuser_nickname   String                @db.VarChar(50)
   syuser_firstname  String                @db.VarChar(50)
   syuser_lastname   String                @db.VarChar(50)
-  syuser_email      String?               @db.VarChar(50)
+  syuser_email      String                @unique @db.VarChar(50)
   syuser_profile_key  String? 
 
   sycontact         SecondYearContact[]
+  joiner_user       SecondYearUserAndUserJoiner[]
 
   created_at        DateTime              @default(now())
   updated_at        DateTime              @updatedAt
@@ -122,6 +134,7 @@ model User {
   displayUsername String?
 
   joiner_fyuser        FirstYearUserAndUserJoiner[]
+  joiner_syuser        SecondYearUserAndUserJoiner[]
   
   sessions        Session[]
   accounts        Account[]
