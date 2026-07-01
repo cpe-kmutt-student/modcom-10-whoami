@@ -17,9 +17,11 @@ export class SyContactController {
 
 	@Get("info")
 	@UseGuards(SeniorPermission)
-	getContactInfo(@Session() session: UserSession) {}
+	getContactInfo(@Session() session: UserSession) {
+		return this.syContactService.getContactInfo(session.user.id);
+	}
 
-	@Post("/upload")
+	@Post("/update")
 	@UseGuards(SeniorPermission)
 	updateContactInfo(@Session() session: UserSession, @Body() contactUpdateDto: ContactUpdateDto) {
 		return this.syContactService.updateContactInfo(session.user.id, contactUpdateDto);

@@ -26,13 +26,23 @@ export class HintDto {
 export class ContactUpdateDto {
 	@IsString()
 	@IsNotEmpty()
-	@MaxLength(100)
+	@MaxLength(50)
+	nickname: string;
+
+	@IsString()
+	@IsNotEmpty()
+	@MaxLength(50)
 	firstname: string;
 
 	@IsString()
 	@IsNotEmpty()
-	@MaxLength(100)
+	@MaxLength(50)
 	lastname: string;
+
+	@IsString()
+	@IsNotEmpty()
+	@MaxLength(50)
+	profileKey: string;
 
 	@IsArray()
 	@ValidateNested({ each: true })
