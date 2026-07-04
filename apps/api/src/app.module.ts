@@ -13,6 +13,7 @@ import { FyAccountModule } from "./modules/fy-account/fy-account.module";
 import { SyContactModule } from "./modules/sy-contact/sy-contact.module";
 import { FyHintScheduleModule } from "./modules/fy-hint-schedule/fy-hint-schedule.module";
 import { ScheduleModule } from "@nestjs/schedule";
+import { SyAccountModule } from "./modules/sy-account/sy-account.module";
 
 @Module({
 	imports: [
@@ -29,6 +30,7 @@ import { ScheduleModule } from "@nestjs/schedule";
 		SyContactModule,
 		FyHintScheduleModule,
 		ScheduleModule.forRoot(),
+		SyAccountModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],
