@@ -39,6 +39,8 @@ model FirstYearQuest {
   fyquest_id        Int                   @id @default(autoincrement())
   fyquest_index     Int                        
   fyquest_detail    String                @db.Text
+  
+  fyquest_status_boxopen    Boolean       @default(false)
 
   fyuser_uuid       String    
   fyuser            FirstYearUser         @relation(fields: [fyuser_uuid], references: [fyuser_uuid])
