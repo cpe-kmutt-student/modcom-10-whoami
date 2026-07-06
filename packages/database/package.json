@@ -15,7 +15,7 @@
 	},
 	"scripts": {
 		"clean": "rimraf dist",
-		"db:migrate:deploy": "prisma migrate deploy",
+		"db:migrate:deploy": "dotenv -e ../../.env -- prisma migrate deploy",
 		"db:migrate:dev": "dotenv -e ../../.env -- prisma migrate dev && prisma generate",
 		"db:push": "prisma db push",
 		"db:seed": "prisma db seed",
