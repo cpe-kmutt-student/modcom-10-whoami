@@ -210,6 +210,9 @@ importers:
       '@repo/database':
         specifier: workspace:*
         version: link:../../packages/database
+      axios:
+        specifier: ^1.18.1
+        version: 1.18.1
       clsx:
         specifier: ^2.1.1
         version: 2.1.1

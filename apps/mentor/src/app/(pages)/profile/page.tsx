@@ -1,6 +1,7 @@
 "use client";
 
 import { ContactPlatform } from "@repo/database/prisma";
+import axios from "axios";
 import clsx from "clsx";
 import {
 	Camera,
@@ -14,20 +15,34 @@ import {
 import { useRouter } from "next/navigation";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
-import { signOut } from "../../../libs/auth-client";
+import { authClient, signOut } from "../../../libs/auth-client";
 
 export default function ProfilePage(): React.JSX.Element {
 	const router = useRouter();
+	const { data } = authClient.useSession();
 
 	const inputRef = useRef<HTMLInputElement>(null);
 	const [isProfileAvailable, setIsProfileAvailable] = useState<boolean>(false);
 	const [contacts, setContacts] = useState<
 		{ platform: string; value: string }[]
 	>([{ platform: Object.keys(ContactPlatform)[0] || "", value: "" }]);
+	const [userData, setUserData] = useState<{
+		email: string;
+		id: string;
+	}>({
+		email: "",
+		id: "",
+	});
 
 	useEffect(() => {
-		console.log(contacts);
-	}, [contacts]);
+		(async () => {
+			axios.defaults.withCredentials = true;
+			const getSeniorData = await axios.get(
+				`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/_/sy/account/profile`,
+			);
+			console.log(getSeniorData);
+		})();
+	}, []);
 
 	const handleAddContactField = () => {
 		setContacts([
@@ -96,7 +111,7 @@ export default function ProfilePage(): React.JSX.Element {
 									Upload photo
 								</button>
 								<div className="mt-10 font-bold text-2xl">
-									kanakorn.thai@kmutt.ac.th
+									{data?.user.email || "loading..."}
 								</div>
 								<div className="font-semibold text-lg">68070501007</div>
 							</div>
@@ -116,11 +131,9 @@ export default function ProfilePage(): React.JSX.Element {
 							</div>
 
 							<div className="flex flex-col items-start mt-5">
-								<div className="font-medium text-sm ml-1 peer-focus:scale-150">
-									Nickname
-								</div>
+								<div className="font-medium text-sm ml-1">Nickname</div>
 								<input
-									className="bg-white w-full border-[2px] rounded-xl h-10 px-5 mt-2 shadow-md outline-none border-[#CAF0F8] focus:scale-105 duration-300 peer"
+									className="bg-white w-full border-[2px] rounded-xl h-10 px-5 mt-2 shadow-md outline-none border-[#CAF0F8] duration-300"
 									type="text"
 									placeholder="What should people call you?"
 								/>
@@ -137,7 +150,7 @@ export default function ProfilePage(): React.JSX.Element {
 								{contacts.map((contact, index) => (
 									<div key={index} className="flex flex-row w-full">
 										<select
-											className="bg-white border-[2px] w-28 rounded-xl h-10 pl-2 pr-5 mt-2 shadow-md outline-none border-[#CAF0F8] focus:scale-105 duration-300 peer"
+											className="bg-white border-[2px] w-28 rounded-xl h-10 pl-2 pr-5 mt-2 shadow-md outline-none border-[#CAF0F8] duration-300"
 											value={contact.platform}
 											onChange={(e) => {
 												setContacts(
@@ -157,7 +170,7 @@ export default function ProfilePage(): React.JSX.Element {
 											))}
 										</select>
 										<input
-											className="bg-white w-full ml-2 border-[2px] rounded-xl h-10 px-5 mt-2 shadow-md outline-none border-[#CAF0F8] focus:scale-105 duration-300 peer"
+											className="bg-white w-full ml-2 border-[2px] rounded-xl h-10 px-5 mt-2 shadow-md outline-none border-[#CAF0F8] duration-300"
 											type="text"
 											placeholder="Enter your username or link"
 											value={contact.value}
@@ -192,9 +205,9 @@ export default function ProfilePage(): React.JSX.Element {
 								<div className="w-full relative">
 									<textarea
 										placeholder="e.g. Full-stack developer"
-										className="bg-white w-full border-[2px] rounded-xl h-10 pl-10 pr-5 mt-2 shadow-md outline-none border-[#CAF0F8] focus:scale-105 duration-300 peer py-[0.40rem] overflow-y-hidden"
+										className="bg-white w-full border-[2px] rounded-xl h-10 pl-10 pr-5 mt-2 shadow-md outline-none border-[#CAF0F8] duration-300 py-[0.40rem] overflow-y-hidden"
 									></textarea>
-									<div className="absolute top-4 left-5 text-base peer-focus:left-1 duration-300">
+									<div className="absolute top-4 left-5 text-base duration-300">
 										1
 									</div>
 								</div>
@@ -202,9 +215,9 @@ export default function ProfilePage(): React.JSX.Element {
 								<div className="w-full relative mt-2">
 									<textarea
 										placeholder="e.g. AI & Machine Learning"
-										className="bg-white w-full border-[2px] rounded-xl h-10 pl-10 pr-5 mt-2 shadow-md outline-none border-[#CAF0F8] focus:scale-105 duration-300 peer py-[0.40rem] overflow-y-hidden"
+										className="bg-white w-full border-[2px] rounded-xl h-10 pl-10 pr-5 mt-2 shadow-md outline-none border-[#CAF0F8] duration-300 py-[0.40rem] overflow-y-hidden"
 									></textarea>
-									<div className="absolute top-4 left-5 text-base peer-focus:left-1 duration-300">
+									<div className="absolute top-4 left-5 text-base duration-300">
 										2
 									</div>
 								</div>
@@ -212,9 +225,9 @@ export default function ProfilePage(): React.JSX.Element {
 								<div className="w-full relative mt-2">
 									<textarea
 										placeholder="e.g. Loves hackathons"
-										className="bg-white w-full border-[2px] rounded-xl h-10 pl-10 pr-5 mt-2 shadow-md outline-none border-[#CAF0F8] focus:scale-105 duration-300 peer py-[0.40rem] overflow-y-hidden"
+										className="bg-white w-full border-[2px] rounded-xl h-10 pl-10 pr-5 mt-2 shadow-md outline-none border-[#CAF0F8] duration-300 py-[0.40rem] overflow-y-hidden"
 									></textarea>
-									<div className="absolute top-4 left-5 text-base peer-focus:left-1 duration-300">
+									<div className="absolute top-4 left-5 text-base duration-300">
 										3
 									</div>
 								</div>
