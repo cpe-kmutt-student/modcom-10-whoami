@@ -21,6 +21,19 @@ model FirstYearUserAndUserJoiner {
   updated_at              DateTime        @updatedAt
 }
 
+model FirstYearUserAndSecondYearUserJoiner {
+  id                      Int               @id @default(autoincrement())
+  
+  fyuser_id               String    
+  fyuser                  FirstYearUser     @relation(fields: [fyuser_id], references: [fyuser_id])
+
+  syuser_id               String
+  syuser                  SecondYearUser    @relation(fields: [syuser_id], references: [syuser_id])
+
+  created_at              DateTime          @default(now())
+  updated_at              DateTime          @updatedAt
+}
+
 model FirstYearUser {
   fyuser_uuid           String            @unique @default(uuid())
   fyuser_id             String            @id
@@ -30,6 +43,8 @@ model FirstYearUser {
 
   fyquest               FirstYearQuest[]
   joiner_user           FirstYearUserAndUserJoiner[]           
+
+  syuser                FirstYearUserAndSecondYearUserJoiner[]
 
   created_at            DateTime          @default(now())
   updated_at            DateTime          @updatedAt
@@ -71,6 +86,8 @@ model SecondYearUser {
 
   sycontact         SecondYearContact[]
   joiner_user       SecondYearUserAndUserJoiner[]
+                   
+  fyuser            FirstYearUserAndSecondYearUserJoiner[]
 
   created_at        DateTime              @default(now())
   updated_at        DateTime              @updatedAt
