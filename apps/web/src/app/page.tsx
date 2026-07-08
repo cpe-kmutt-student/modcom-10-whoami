@@ -1,57 +1,143 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
-import AnnoyingStickers from "@/components/AnnoyingSticker";
 import ParticlesBackground from "@/components/ParticlesBackground";
+import AnnoyingStickers from "@/components/AnnoyingSticker";
 import { authClient } from "@/lib/auth-client";
+import { useState } from "react";
+import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-	const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
-	const login = async () => {
-		try {
-			setIsLoading(true);
-			await authClient.signIn.social({
-				provider: "microsoft",
-				callbackURL: `${process.env.NEXT_PUBLIC_SERVER_URL}/what`,
-			});
-		} catch (error) {
-			console.error("Login failed", error);
-		} finally {
-			setIsLoading(false);
-		}
-	};
+  const login = async () => {
+    try {
+      setIsLoading(true);
+      await authClient.signIn.social({
+        provider: "microsoft",
+        callbackURL: `${process.env.NEXT_PUBLIC_SERVER_URL}/hint`,
+      });
+    } catch (error) {
+      console.error("Login failed", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-	return (
-		<div className="bg-light-cyan-200">
-			<div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden z-2">
-				<button
-					type="button"
-					onClick={login}
-					className={`h-16 bg-white rounded-lg border-3 border-black hover:bg-gray-100 active:bg-gray-300 transition duration-25 flex flex-row items-center justify-center gap-3 pr-8 pl-6 py-4 relative 
-            ${isLoading ? "cursor-wait brightness-75" : "cursor-pointer"}
-          `}
-				>
-					<Image
-						src="/KMUTT.png"
-						width={0}
-						height={0}
-						sizes="20vw"
-						style={{ width: "auto", height: "50px" }}
-						alt="KMUTT"
-					/>
-					<div className="text-base font-mali font-bold">
-						ดำเนินการต่อด้วยบัญชี KMUTT
-					</div>
-				</button>
-			</div>
+  return (
+    <div className="bg-blue-50 min-h-screen relative overflow-hidden">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1.5 }}
+        className="absolute inset-0 z-0 pointer-events-none"
+      >
+        <ParticlesBackground />
+      </motion.div>
+      <div className="absolute inset-0 z-0">
+        <AnnoyingStickers />
+      </div>
 
-			<footer className="absolute bottom-0 pl-3 pb-1 text-xs text-deep-twilight-800/25 z-100">
-				©2026 CPE39. All rights reserved.
-			</footer>
-			<AnnoyingStickers />
-			<ParticlesBackground />
-		</div>
-	);
+      <motion.div
+        initial={{ y: 50, opacity: 0, scale: 0.9 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        transition={{ type: "spring", bounce: 0.5, duration: 0.6 }}
+        className="relative flex min-h-screen flex-col items-center justify-center z-10 px-2"
+      >
+        <div className="relative">
+          <button
+            type="button"
+            onClick={login}
+            disabled={isLoading}
+            className={`
+              group flex flex-row items-center justify-center px-8 py-4 relative
+              bg-cloud rounded-full border-3 border-blue-900 
+              shadow-comic transition-all duration-300 ease-out
+              
+              ${
+                isLoading
+                  ? "opacity-75 grayscale-[0.2] shadow-none translate-x-[4px] translate-y-[4px] cursor-wait"
+                  : `cursor-pointer hover:shadow-comic-hover hover:translate-x-[2px] hover:translate-y-[2px]
+                     active:shadow-none active:translate-x-[4px] active:translate-y-[4px]`
+              }
+            `}
+          >
+            <Image
+              src="/KMUTT.png"
+              width={0}
+              height={0}
+              sizes="20vw"
+              className={`w-auto h-[45px] transition-transform duration-300 mr-4 ${
+                isLoading ? "" : "group-hover:scale-105 group-hover:-rotate-3"
+              }`}
+              alt="KMUTT"
+            />
+
+            <div className="text-lg font-mali font-bold text-blue-900 flex items-center">
+              <span>ดำเนินการต่อด้วยบัญชี KMUTT</span>
+
+              <div
+                className={`
+                  flex items-center justify-center overflow-hidden 
+                  transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]
+                  ${
+                    isLoading
+                      ? "max-w-[40px] opacity-100 ml-3 scale-100 translate-y-0"
+                      : "max-w-0 opacity-0 ml-0 scale-50 translate-y-4"
+                  }
+                `}
+              >
+                <svg
+                  className="animate-spin h-6 w-6 text-blue-900 shrink-0"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-90"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+          </button>
+
+          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[320px] text-center pointer-events-auto">
+            <p className="text-xs leading-relaxed font-mali text-blue-900/70 text-center max-w-xs mt-2">
+              การเข้าสู่ระบบหมายถึงคุณยอมรับ{" "}
+              <a
+                onClick={() => router.push("/privacy-policy")}
+                className="cursor-pointer text-nowrap font-bold text-blue-900 underline decoration-2 decoration-blue-900/30 hover:decoration-quirky hover:text-blue-600 transition-colors"
+              >
+                นโยบายความเป็นส่วนตัว
+              </a>{" "}
+              และ{" "}
+              <a
+                onClick={() => router.push("/terms-of-service")}
+                className="cursor-pointer text-nowrap font-bold text-blue-900 underline decoration-2 decoration-blue-900/30 hover:decoration-quirky hover:text-blue-600 transition-colors"
+              >
+                ข้อกำหนดการใช้งาน
+              </a>{" "}
+              <span className="text-nowrap">ของเรา</span>
+            </p>
+          </div>
+        </div>
+      </motion.div>
+
+      <footer className="absolute bottom-3 left-4 text-xs text-blue-900/40 z-20 font-mali">
+        ©2026 CPE39. All rights reserved.
+      </footer>
+    </div>
+  );
 }
