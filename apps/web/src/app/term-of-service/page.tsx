@@ -138,7 +138,7 @@ export default function Home() {
 									</h1>
 									<ul key={list.key_th} className="pl-16 mt-2 list-disc">
 										{list.info.map((infos, index) => (
-											<li key={"${list.key_th}-info-${index}"}>
+											<li key={infos}>
 												<p>{infos}</p>
 											</li>
 										))}
@@ -150,7 +150,7 @@ export default function Home() {
 									</h1>
 									<ul key={list.key_eng} className="pl-16 mt-2 list-disc">
 										{list.info_eng.map((infos, index) => (
-											<li key={"${list.key_en}-info-${index}"}>
+											<li key={infos}>
 												<p>{infos}</p>
 											</li>
 										))}
