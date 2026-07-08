@@ -11,19 +11,32 @@ generator client {
 }
 
 model FirstYearUserAndUserJoiner {
-  id                      Int @id @default(autoincrement())
+  id                      Int             @id @default(autoincrement())
   fyuser_email            String          
-  fyuser           FirstYearUser   @relation(fields: [fyuser_email], references: [fyuser_email])       
+  fyuser                  FirstYearUser   @relation(fields: [fyuser_email], references: [fyuser_email])       
   user_email              String          
-  user             User            @relation(fields: [user_email], references: [email])
+  user                    User            @relation(fields: [user_email], references: [email])
 
   created_at              DateTime        @default(now())
   updated_at              DateTime        @updatedAt
 }
 
+model FirstYearUserAndSecondYearUserJoiner {
+  id                      Int               @id @default(autoincrement())
+  
+  fyuser_id               String    
+  fyuser                  FirstYearUser     @relation(fields: [fyuser_id], references: [fyuser_id])
+
+  syuser_id               String
+  syuser                  SecondYearUser    @relation(fields: [syuser_id], references: [syuser_id])
+
+  created_at              DateTime          @default(now())
+  updated_at              DateTime          @updatedAt
+}
+
 model FirstYearUser {
-  fyuser_uuid           String            @id @default(uuid())
-  fyuser_id             String            @unique
+  fyuser_uuid           String            @unique @default(uuid())
+  fyuser_id             String            @id
   fyuser_firstname      String            @db.VarChar(50)
   fyuser_lastname       String            @db.VarChar(50)
   fyuser_email          String            @unique @db.VarChar(50) 
@@ -31,35 +44,53 @@ model FirstYearUser {
   fyquest               FirstYearQuest[]
   joiner_user           FirstYearUserAndUserJoiner[]           
 
+  syuser                FirstYearUserAndSecondYearUserJoiner[]
+
   created_at            DateTime          @default(now())
   updated_at            DateTime          @updatedAt
 }
 
 model FirstYearQuest {
-  fyquest_id        Int                   @id @default(autoincrement())
-  fyquest_index     Int                        
-  fyquest_detail    String                @db.Text
+  fyquest_id                Int                   @id @default(autoincrement())
+  fyquest_index             Int                        
+  fyquest_detail            String                @db.Text
+  
+  fyquest_status_boxopen    Boolean       @default(false)
 
-  fyuser_uuid       String    
-  fyuser            FirstYearUser         @relation(fields: [fyuser_uuid], references: [fyuser_uuid])
+  fyuser_id                 String    
+  fyuser                    FirstYearUser         @relation(fields: [fyuser_id], references: [fyuser_id])
 
-  created_at        DateTime              @default(now())
-  updated_at        DateTime              @updatedAt
+  created_at                DateTime              @default(now())
+  updated_at                DateTime              @updatedAt
+}
+
+model SecondYearUserAndUserJoiner {
+  id                      Int @id @default(autoincrement())
+  syuser_email            String          
+  syuser                  SecondYearUser   @relation(fields: [syuser_email], references: [syuser_email])       
+  user_email              String          
+  user                    User            @relation(fields: [user_email], references: [email])
+
+  created_at              DateTime        @default(now())
+  updated_at              DateTime        @updatedAt
 }
 
 model SecondYearUser {
-  syuser_uuid       String                @id @default(uuid())
-  syuser_id         String                @unique
-  syuser_nickname   String                @db.VarChar(50)
-  syuser_firstname  String                @db.VarChar(50)
-  syuser_lastname   String                @db.VarChar(50)
-  syuser_email      String?               @db.VarChar(50)
+  syuser_uuid         String                @unique @default(uuid())
+  syuser_id           String                @id @unique
+  syuser_nickname     String                @db.VarChar(50)
+  syuser_firstname    String                @db.VarChar(50)
+  syuser_lastname     String                @db.VarChar(50)
+  syuser_email        String                @unique @db.VarChar(50)
   syuser_profile_key  String? 
 
-  sycontact         SecondYearContact[]
+  sycontact           SecondYearContact[]
+  joiner_user         SecondYearUserAndUserJoiner[]
+                   
+  fyuser              FirstYearUserAndSecondYearUserJoiner[]
 
-  created_at        DateTime              @default(now())
-  updated_at        DateTime              @updatedAt
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
 }
 
 enum ContactPlatform {
@@ -98,11 +129,11 @@ model SecondYearContact {
   sycontact_platform  ContactPlatform       @default(other)
   sycontact_detail    String                @db.Text
   
-  syuser_uuid       String      
-  syuser            SecondYearUser        @relation(fields: [syuser_uuid], references: [syuser_uuid])
+  syuser_id           String      
+  syuser              SecondYearUser        @relation(fields: [syuser_id], references: [syuser_id])
 
-  created_at        DateTime              @default(now())
-  updated_at        DateTime              @updatedAt
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
 }
 
 
@@ -122,6 +153,7 @@ model User {
   displayUsername String?
 
   joiner_fyuser        FirstYearUserAndUserJoiner[]
+  joiner_syuser        SecondYearUserAndUserJoiner[]
   
   sessions        Session[]
   accounts        Account[]

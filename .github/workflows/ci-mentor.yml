@@ -1,17 +1,17 @@
-name: CI Web
+name: CI Mentor
 
 on:
   push:
     branches:
       - main
-      - merge/frontend
+      - merge/mentor
   workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
 
 jobs:
-  build-web:
+  build-mentor:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -20,6 +20,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -34,23 +37,23 @@ jobs:
       - name: Set lower case actor name
         run: echo "ACTOR=${GITHUB_ACTOR,,}" >> ${GITHUB_ENV}
 
-      - name: Extract metadata (tags, labels) for Web
-        id: meta-web
+      - name: Extract metadata (tags, labels) for API
+        id: meta-mentor
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.ACTOR }}/mentor-mentee-web
+          images: ${{ env.REGISTRY }}/${{ env.ACTOR }}/mentor-mentee-mentor
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=ref,event=branch
             type=sha,prefix=,format=short
 
 
-      - name: Build and push Web Image
+      - name: Build and push API Image
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: apps/web/Dockerfile
+          file: apps/mentor/Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta-web.outputs.tags }}
-          labels: ${{ steps.meta-web.outputs.labels }}
+          tags: ${{ steps.meta-mentor.outputs.tags }}
+          labels: ${{ steps.meta-mentor.outputs.labels }}

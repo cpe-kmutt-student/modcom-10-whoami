@@ -122,6 +122,7 @@ export default function ProfilePage(): React.JSX.Element {
 								<input
 									className="bg-white w-full border-[2px] rounded-xl h-10 px-5 mt-2 shadow-md outline-none border-[#CAF0F8] focus:scale-105 duration-300 peer"
 									type="text"
+									placeholder="What should people call you?"
 								/>
 							</div>
 							<div className="flex flex-col items-start mt-5">
@@ -158,6 +159,7 @@ export default function ProfilePage(): React.JSX.Element {
 										<input
 											className="bg-white w-full ml-2 border-[2px] rounded-xl h-10 px-5 mt-2 shadow-md outline-none border-[#CAF0F8] focus:scale-105 duration-300 peer"
 											type="text"
+											placeholder="Enter your username or link"
 											value={contact.value}
 											onChange={(e) => {
 												setContacts(
@@ -188,21 +190,30 @@ export default function ProfilePage(): React.JSX.Element {
 
 							<div className="flex flex-col items-start mt-5">
 								<div className="w-full relative">
-									<textarea className="bg-white w-full border-[2px] rounded-xl h-10 pl-10 pr-5 mt-2 shadow-md outline-none border-[#CAF0F8] focus:scale-105 duration-300 peer py-[0.40rem] overflow-y-hidden"></textarea>
+									<textarea
+										placeholder="e.g. Full-stack developer"
+										className="bg-white w-full border-[2px] rounded-xl h-10 pl-10 pr-5 mt-2 shadow-md outline-none border-[#CAF0F8] focus:scale-105 duration-300 peer py-[0.40rem] overflow-y-hidden"
+									></textarea>
 									<div className="absolute top-4 left-5 text-base peer-focus:left-1 duration-300">
 										1
 									</div>
 								</div>
 
 								<div className="w-full relative mt-2">
-									<textarea className="bg-white w-full border-[2px] rounded-xl h-10 pl-10 pr-5 mt-2 shadow-md outline-none border-[#CAF0F8] focus:scale-105 duration-300 peer py-[0.40rem] overflow-y-hidden"></textarea>
+									<textarea
+										placeholder="e.g. AI & Machine Learning"
+										className="bg-white w-full border-[2px] rounded-xl h-10 pl-10 pr-5 mt-2 shadow-md outline-none border-[#CAF0F8] focus:scale-105 duration-300 peer py-[0.40rem] overflow-y-hidden"
+									></textarea>
 									<div className="absolute top-4 left-5 text-base peer-focus:left-1 duration-300">
 										2
 									</div>
 								</div>
 
 								<div className="w-full relative mt-2">
-									<textarea className="bg-white w-full border-[2px] rounded-xl h-10 pl-10 pr-5 mt-2 shadow-md outline-none border-[#CAF0F8] focus:scale-105 duration-300 peer py-[0.40rem] overflow-y-hidden"></textarea>
+									<textarea
+										placeholder="e.g. Loves hackathons"
+										className="bg-white w-full border-[2px] rounded-xl h-10 pl-10 pr-5 mt-2 shadow-md outline-none border-[#CAF0F8] focus:scale-105 duration-300 peer py-[0.40rem] overflow-y-hidden"
+									></textarea>
 									<div className="absolute top-4 left-5 text-base peer-focus:left-1 duration-300">
 										3
 									</div>
