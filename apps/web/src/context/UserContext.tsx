@@ -37,7 +37,7 @@ interface UserContextType {
   markHintAsOpened: (hintId: string) => Promise<void>;
 }
 
-const isMockMode = (process.env.NEXT_PUBLIC_USE_MOCK === "tsrue");
+const isMockMode = (process.env.NEXT_PUBLIC_USE_MOCK === "true");
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
