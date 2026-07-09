@@ -89,9 +89,6 @@ export default function UserProfile() {
 								<span className="text-lg font-bold font-mali text-blue-900 truncate">
 									{studentData?.name}
 								</span>
-								<span className="text-xs font-sans font-bold text-blue-500">
-									หลักสูตรปกติ
-								</span>
 							</div>
 
 							<div className="flex items-center gap-3 text-blue-900 bg-blue-50 p-2 rounded-xl border-2 border-blue-900 h-9">
