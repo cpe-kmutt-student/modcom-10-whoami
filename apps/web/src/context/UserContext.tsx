@@ -108,11 +108,22 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 	const [studentDataRefreshKey, setStudentDataRefreshKey] = useState(0);
 
 	const initialMockData = {
-		session: { id: "mock-session", expiresAt: new Date() },
+		session: {
+			id: "mock-session",
+			createdAt: new Date(),
+			updatedAt: new Date(),
+			userId: "mock",
+			expiresAt: new Date(),
+			token: "mock-token",
+		},
 		user: {
 			id: "mock",
+			createdAt: new Date(),
+			updatedAt: new Date(),
 			name: "Joe Don",
 			email: "student@kmutt.ac.th",
+			emailVerified: false,
+			image: null,
 		},
 		studentData: {
 			studentID: "69070501000",
