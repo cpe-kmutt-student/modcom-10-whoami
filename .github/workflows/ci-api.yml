@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - staging
       - merge/backend
   workflow_dispatch:
 
