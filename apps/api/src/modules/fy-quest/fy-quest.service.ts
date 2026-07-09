@@ -1,4 +1,6 @@
 import { ForbiddenException, HttpException, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
+import { config } from "@repo/config";
+import { getPreSignUrl } from "@repo/storage";
 import { Request } from "express";
 import { QuestAllow } from "src/common/guards/quest-period.guard";
 import { PrismaService } from "src/core/prisma/prisma.service";
@@ -40,7 +42,16 @@ export class FyQuestService {
 				.filter((q) => (!req.questAllow.quest2 ? q.fyquest_id !== 2 : true))
 				.filter((q) => (!req.questAllow.quest3 ? q.fyquest_id !== 3 : true));
 
-			return filterQuest;
+			const mapQuestImageUrl = await Promise.all(
+				filterQuest.map(async (q) => {
+					return {
+						...q,
+						fyquest_url: q.fyquest_detail ? await getPreSignUrl(config.backend.s3.bucket, q.fyquest_detail) : null,
+					};
+				}),
+			);
+
+			return mapQuestImageUrl;
 		} catch (e) {
 			this.logger.error(e);
 			if (e instanceof HttpException) {

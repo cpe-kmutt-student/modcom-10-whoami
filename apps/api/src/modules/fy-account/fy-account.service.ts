@@ -1,4 +1,4 @@
-import { ForbiddenException, HttpException, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
+import { ForbiddenException, HttpException, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "src/core/prisma/prisma.service";
 import { LinkAccountDto } from "./dto/link-account.dto";
 
@@ -8,7 +8,7 @@ export class FyAccountService {
 
 	private readonly logger = new Logger(FyAccountService.name);
 
-	async linkFirstYearAccount(userEmail: string, linkAccountDto: LinkAccountDto) {
+	async linkAccount(userEmail: string, linkAccountDto: LinkAccountDto) {
 		try {
 			const validateAccount = await this.prisma.client.firstYearUser.findUnique({
 				where: {
@@ -58,6 +58,9 @@ export class FyAccountService {
 			const user = await this.prisma.client.user.findUnique({
 				where: {
 					id: userId,
+					joiner_fyuser: {
+						some: {},
+					},
 				},
 				include: {
 					joiner_fyuser: {
