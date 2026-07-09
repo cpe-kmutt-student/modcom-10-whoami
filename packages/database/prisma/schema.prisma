@@ -10,9 +10,205 @@ generator client {
   output = "../generated/client"
 }
 
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
+model FirstYearUserAndUserJoiner {
+  id                      Int             @id @default(autoincrement())
+  fyuser_email            String          
+  fyuser                  FirstYearUser   @relation(fields: [fyuser_email], references: [fyuser_email])       
+  user_email              String          
+  user                    User            @relation(fields: [user_email], references: [email])
+
+  created_at              DateTime        @default(now())
+  updated_at              DateTime        @updatedAt
 }
+
+model FirstYearUserAndSecondYearUserJoiner {
+  id                      Int               @id @default(autoincrement())
+  
+  fyuser_id               String    
+  fyuser                  FirstYearUser     @relation(fields: [fyuser_id], references: [fyuser_id])
+
+  syuser_id               String
+  syuser                  SecondYearUser    @relation(fields: [syuser_id], references: [syuser_id])
+
+  created_at              DateTime          @default(now())
+  updated_at              DateTime          @updatedAt
+}
+
+model FirstYearUser {
+  fyuser_uuid           String            @unique @default(uuid())
+  fyuser_id             String            @id
+  fyuser_firstname      String            @db.VarChar(50)
+  fyuser_lastname       String            @db.VarChar(50)
+  fyuser_email          String            @unique @db.VarChar(50) 
+
+  fyquest               FirstYearQuest[]
+  joiner_user           FirstYearUserAndUserJoiner[]           
+
+  syuser                FirstYearUserAndSecondYearUserJoiner[]
+
+  created_at            DateTime          @default(now())
+  updated_at            DateTime          @updatedAt
+}
+
+model FirstYearQuest {
+  fyquest_id                Int                   @id @default(autoincrement())
+  fyquest_index             Int                        
+  fyquest_detail            String                @db.Text
+  
+  fyquest_status_boxopen    Boolean       @default(false)
+
+  fyuser_id                 String    
+  fyuser                    FirstYearUser         @relation(fields: [fyuser_id], references: [fyuser_id])
+
+  created_at                DateTime              @default(now())
+  updated_at                DateTime              @updatedAt
+}
+
+model SecondYearUserAndUserJoiner {
+  id                      Int @id @default(autoincrement())
+  syuser_email            String          
+  syuser                  SecondYearUser   @relation(fields: [syuser_email], references: [syuser_email])       
+  user_email              String          
+  user                    User            @relation(fields: [user_email], references: [email])
+
+  created_at              DateTime        @default(now())
+  updated_at              DateTime        @updatedAt
+}
+
+model SecondYearUser {
+  syuser_uuid         String                @unique @default(uuid())
+  syuser_id           String                @id @unique
+  syuser_nickname     String                @db.VarChar(50)
+  syuser_firstname    String                @db.VarChar(50)
+  syuser_lastname     String                @db.VarChar(50)
+  syuser_email        String                @unique @db.VarChar(50)
+  syuser_profile_key  String? 
+
+  sycontact           SecondYearContact[]
+  joiner_user         SecondYearUserAndUserJoiner[]
+                   
+  fyuser              FirstYearUserAndSecondYearUserJoiner[]
+
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+}
+
+enum ContactPlatform {
+  instagram
+  line
+  facebook
+  roblox
+  discord
+  wechat
+  tiktok
+  whatsapp
+  twitter
+  threads
+  shopee
+  lazada
+  youtube
+  zoom
+  modlink
+  github
+  tinder
+  omi
+  bankpassword
+  atmcardnumber
+  phonenumber
+  email
+  telegraph
+  address
+  ipaddress
+  calculator
+  nokia3310
+  other
+}
+
+model SecondYearContact {
+  sycontact_id        Int                   @id @default(autoincrement())
+  sycontact_platform  ContactPlatform       @default(other)
+  sycontact_detail    String                @db.Text
+  
+  syuser_id           String      
+  syuser              SecondYearUser        @relation(fields: [syuser_id], references: [syuser_id])
+
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+}
+
+
+model User {
+  id              String    @id
+  name            String
+  email           String    
+  emailVerified   Boolean   @default(false)
+  image           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  role            String?
+  banned          Boolean?  @default(false)
+  banReason       String?
+  banExpires      DateTime?
+  username        String?
+  displayUsername String?
+
+  joiner_fyuser        FirstYearUserAndUserJoiner[]
+  joiner_syuser        SecondYearUserAndUserJoiner[]
+  
+  sessions        Session[]
+  accounts        Account[]
+
+  @@unique([email])
+  @@unique([username])
+  @@map("user")
+}
+
+model Session {
+  id             String   @id
+  expiresAt      DateTime
+  token          String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  ipAddress      String?
+  userAgent      String?
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  impersonatedBy String?
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+

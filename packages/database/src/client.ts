@@ -6,7 +6,7 @@ import { PrismaClient } from "../generated/client";
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
 const pool = new Pool({
-	connectionString: config.backend.database_url,
+	connectionString: config.backend.databaseUrl,
 });
 export const adapter = new PrismaPg(pool);
 
@@ -17,6 +17,6 @@ export const prisma =
 		log: ["query", "info", "warn", "error"],
 	});
 
-if (config.node_env !== "production") globalForPrisma.prisma = prisma;
+if (config.nodeEnv !== "production") globalForPrisma.prisma = prisma;
 
 export * from "../generated/client";

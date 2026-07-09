@@ -1,0 +1,23 @@
+{
+	"root": false,
+	"$schema": "../../biome.json",
+	"linter": {
+		"rules": {
+			"a11y": {
+				"useKeyWithClickEvents": "off",
+				"noStaticElementInteractions": "off",
+				"noSvgWithoutTitle": "off"
+			},
+			"correctness": {
+				"noUnusedImports": "off",
+				"noUnusedVariables": "off"
+			},
+			"suspicious": {
+				"noUnknownAtRules": "off"
+			},
+			"complexity": {
+				"noUselessFragments": "off"
+			}
+		}
+	}
+}

@@ -4,5 +4,3 @@ Dockerfile
 *.log
 .env
 dist
-
-pnpm-workspace.yaml
