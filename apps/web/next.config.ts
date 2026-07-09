@@ -7,6 +7,11 @@ const nextConfig: NextConfig = {
 				protocol: "https",
 				hostname: "i.pravatar.cc",
 			},
+			{
+				protocol: "https",
+				hostname: "s3.aboutnon.in.th",
+				pathname: "/**",
+			},
 		],
 	},
 };
