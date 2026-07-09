@@ -1,42 +1,75 @@
-
 x-defaults: &defaults
   restart: unless-stopped
   env_file:
     - .env
   networks:
     - internal
+  labels:
+    com.centurylinklabs.watchtower.enable: "true"
+    traefik.docker.network: internal
   logging:
     driver: json-file
     options:
       max-size: "10m"
       max-file: "5"
-  security_opt:
-    - no-new-privileges:true
 
 services:
-  nginx:
-    <<: *defaults
-    image: nginx:1.29-alpine
+  traefik:
+    image: traefik:v3.1
+    restart: unless-stopped
+    command:
+      - --api.dashboard=false
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=internal
+      - --entrypoints.web.address=:80
+      - --accesslog=true
+      - --log.level=INFO
     ports:
-      - "8030:80"
+      - "8008:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      api:
-        condition: service_healthy
-      web:
-        condition: service_started
-    healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1 || exit 1"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
-    read_only: true
-    tmpfs:
-      - /var/cache/nginx
-      - /var/run
-      - /tmp
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - internal
+
+  web:
+    <<: *defaults
+    image: ghcr.io/imjustnon/mentor-mentee-web:staging
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+      traefik.docker.network: internal
+      traefik.enable: "true"
+      traefik.http.routers.web.entrypoints: web
+      traefik.http.routers.web.rule: Host(`${WEB_HOST:-localhost}`)
+      traefik.http.routers.web.service: web
+      traefik.http.services.web.loadbalancer.server.port: "3000"
+
+  api:
+    <<: *defaults
+    image: ghcr.io/imjustnon/mentor-mentee-api:staging
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+      traefik.docker.network: internal
+      traefik.enable: "true"
+      traefik.http.middlewares.api-strip.stripprefix.prefixes: /api
+      traefik.http.routers.api.entrypoints: web
+      traefik.http.routers.api.priority: "100"
+      traefik.http.routers.api.rule: Host(`${WEB_HOST:-localhost}`) && PathPrefix(`/api`)
+      traefik.http.routers.api.middlewares: api-strip
+      traefik.http.routers.api.service: api
+      traefik.http.services.api.loadbalancer.server.port: "3010"
+
+  mentor:
+    <<: *defaults
+    image: ghcr.io/imjustnon/mentor-mentee-mentor:staging
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+      traefik.docker.network: internal
+      traefik.enable: "true"
+      traefik.http.routers.mentor.entrypoints: web
+      traefik.http.routers.mentor.rule: Host(`${MENTOR_HOST:-mentor.localhost}`)
+      traefik.http.routers.mentor.service: mentor
+      traefik.http.services.mentor.loadbalancer.server.port: "3005"
 
   watchtower:
     image: containrrr/watchtower:latest
@@ -55,37 +88,6 @@ services:
       WATCHTOWER_REVIVE_STOPPED: "false"
     networks:
       - internal
-
-  api:
-    <<: *defaults
-    image: ghcr.io/imjustnon/mentor-mentee-api:merge-backend
-    expose:
-      - "3000"
-    labels:
-      com.centurylinklabs.watchtower.enable: "true"
-    healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:3000/health || exit 1"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
-  web:
-    <<: *defaults
-    image: ghcr.io/imjustnon/mentor-mentee-web:merge-backend
-    expose:
-      - "3000"
-    depends_on:
-      api:
-        condition: service_healthy
-    labels:
-      com.centurylinklabs.watchtower.enable: "true"
-    healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:3000 || exit 1"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
 
 networks:
   internal:
