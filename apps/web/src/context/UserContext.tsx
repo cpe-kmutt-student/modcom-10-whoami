@@ -1,195 +1,293 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  type ReactNode,
-  useState,
-  useEffect,
-} from "react";
-import { authClient, Session } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import {
+	createContext,
+	type ReactNode,
+	useContext,
+	useEffect,
+	useState,
+} from "react";
+import { authClient, type Session } from "@/lib/auth-client";
 
 export interface HintItem {
-  hint: string;
-  isOpen: boolean;
+	hint: string;
+	isOpen: boolean;
 }
 
 export interface StudentData {
-  studentID: string;
-  name: string;
-  program: string;
-  hints: {
-    1: HintItem | null;
-    2: HintItem | null;
-    3: HintItem | null;
-  };
+	studentID: string;
+	name: string;
+	program: string;
+	hints: {
+		1: HintItem | null;
+		2: HintItem | null;
+		3: HintItem | null;
+	};
 }
 
 interface UserContextType {
-  session: Session["session"] | null;
-  user: Session["user"] | null;
-  isLoading: boolean;
-  isStudentLoading: boolean;
-  error: Error | null;
-  signOut: () => Promise<void>;
-  studentData: StudentData | null;
-  markHintAsOpened: (hintId: string) => Promise<void>;
+	session: Session["session"] | null;
+	user: Session["user"] | null;
+	isLoading: boolean;
+	isStudentLoading: boolean;
+	error: Error | null;
+	signOut: () => Promise<void>;
+	studentData: StudentData | null;
+	markHintAsOpened: (hintId: string) => Promise<void>;
+	refreshStudentData: () => void;
 }
 
-const isMockMode = (process.env.NEXT_PUBLIC_USE_MOCK === "true");
+const isMockMode = process.env.NEXT_PUBLIC_USE_MOCK === "true";
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
+type FyAccountProfileResponse = {
+	joiner_fyuser?: Array<{
+		fyuser?: {
+			fyuser_id?: string;
+			fyuser_firstname?: string;
+			fyuser_lastname?: string;
+		};
+	}>;
+};
+
+type FyQuestResponse = Array<{
+	fyquest_index: number;
+	fyquest_status_boxopen: boolean;
+	fyquest_url: string | null;
+}>;
+
+const emptyHints = (): StudentData["hints"] => ({
+	1: null,
+	2: null,
+	3: null,
+});
+
+const mapProfileAndQuestsToStudentData = (
+	profile: FyAccountProfileResponse,
+	quests: FyQuestResponse,
+): StudentData | null => {
+	const fyuser = profile.joiner_fyuser?.[0]?.fyuser;
+
+	if (!fyuser?.fyuser_id) {
+		return null;
+	}
+
+	const hints = emptyHints();
+
+	quests.forEach((quest) => {
+		if (
+			quest.fyquest_index === 1 ||
+			quest.fyquest_index === 2 ||
+			quest.fyquest_index === 3
+		) {
+			hints[quest.fyquest_index] = {
+				hint: quest.fyquest_url ?? "",
+				isOpen: quest.fyquest_status_boxopen,
+			};
+		}
+	});
+
+	const fullName = [fyuser.fyuser_firstname, fyuser.fyuser_lastname]
+		.filter(Boolean)
+		.join(" ")
+		.trim();
+
+	return {
+		studentID: fyuser.fyuser_id,
+		name: fullName || fyuser.fyuser_id,
+		program: "",
+		hints,
+	};
+};
+
 export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const { data, isPending, error } = authClient.useSession();
-  const router = useRouter();
+	const { data, isPending, error } = authClient.useSession();
+	const router = useRouter();
+	const [studentDataRefreshKey, setStudentDataRefreshKey] = useState(0);
 
-  const initialMockData = {
-    session: { id: "mock-session", expiresAt: new Date() },
-    user: {
-      id: "mock",
-      name: "Joe Don",
-      email: "student@kmutt.ac.th",
-    },
-    studentData: {
-      studentID: "69070501000",
-      name: "นายห่านนอย ลอยคอ",
-      program: "Reg",
-      hints: {
-        1: { hint: "/test-hint.png", isOpen: true },
-        2: { hint: "/to1045.png", isOpen: true },
-        3: { hint: "/IMG_20260702_202700_208.jpg", isOpen: false },
-      },
-    },
-  } satisfies {
-    session: Session["session"];
-    user: Session["user"];
-    studentData: StudentData;
-  };
+	const initialMockData = {
+		session: { id: "mock-session", expiresAt: new Date() },
+		user: {
+			id: "mock",
+			name: "Joe Don",
+			email: "student@kmutt.ac.th",
+		},
+		studentData: {
+			studentID: "69070501000",
+			name: "นายห่านนอย ลอยคอ",
+			program: "Reg",
+			hints: {
+				1: { hint: "/test-hint.png", isOpen: true },
+				2: { hint: "/to1045.png", isOpen: true },
+				3: { hint: "/IMG_20260702_202700_208.jpg", isOpen: false },
+			},
+		},
+	} satisfies {
+		session: Session["session"];
+		user: Session["user"];
+		studentData: StudentData;
+	};
 
-  const [studentData, setStudentData] = useState<StudentData | null>(() =>
-    isMockMode ? initialMockData.studentData : null,
-  );
-  const [isStudentLoading, setIsStudentLoading] = useState<boolean>(false);
+	const [studentData, setStudentData] = useState<StudentData | null>(() =>
+		isMockMode ? initialMockData.studentData : null,
+	);
+	const [isStudentLoading, setIsStudentLoading] = useState<boolean>(false);
 
-  const [mockData, setMockData] = useState<{
-    session: Session["session"];
-    user: Session["user"];
-    studentData: StudentData;
-  } | null>({
-    ...initialMockData,
-  });
+	const [mockData, setMockData] = useState<{
+		session: Session["session"];
+		user: Session["user"];
+		studentData: StudentData;
+	} | null>({
+		...initialMockData,
+	});
 
-  useEffect(() => {
-    if (isMockMode) return;
+	useEffect(() => {
+		if (isMockMode) return;
 
-    if (data?.user) {
-      const fetchStudentData = async () => {
-        setIsStudentLoading(true);
-        try {
-          const response = await fetch(`/api/students/${data.user.id}`);
-          const resData: StudentData = await response.json();
-          setStudentData(resData);
-        } catch (err) {
-          console.error("Failed to fetch student data:", err);
-        } finally {
-          setIsStudentLoading(false);
-        }
-      };
+		if (data?.user?.id) {
+			const fetchStudentData = async () => {
+				setIsStudentLoading(true);
 
-      fetchStudentData();
-    }
-  }, [data?.user, isPending]);
+				try {
+					const [profileResponse, questResponse] = await Promise.all([
+						fetch(
+							`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/_/fy/account/profile`,
+							{
+								credentials: "include",
+							},
+						),
+						fetch(
+							`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/_/fy/quest/`,
+							{
+								credentials: "include",
+							},
+						),
+					]);
 
-  const handleSignOut = async () => {
-    if (isMockMode) {
-      setMockData(null);
-      setStudentData(null);
-      router.refresh();
-      return;
-    }
+					if (!profileResponse.ok || !questResponse.ok) {
+						router.push("/genetic-testing");
+						throw new Error("Failed to fetch student data from backend");
+					}
 
-    try {
-      await authClient.signOut();
-      setStudentData(null);
-      router.refresh();
-    } catch (err) {
-      console.error("Sign out failed", err);
-    }
-  };
+					const [profileData, questData] = await Promise.all([
+						profileResponse.json() as Promise<FyAccountProfileResponse>,
+						questResponse.json() as Promise<FyQuestResponse>,
+					]);
 
+					const mappedStudentData = mapProfileAndQuestsToStudentData(
+						profileData,
+						questData,
+					);
+					setStudentData(mappedStudentData);
+				} catch (err) {
+					console.error("Failed to fetch student data:", err);
+				} finally {
+					setIsStudentLoading(false);
+				}
+			};
 
-  const markHintAsOpened = async (hintId: string) => {
-    const validIds = ["1", "2", "3"];
-    if (!validIds.includes(hintId) || !studentData) return;
+			fetchStudentData();
+		} else {
+			setStudentData(null);
+		}
+	}, [data?.user?.id, isPending, studentDataRefreshKey]);
 
-    const id = parseInt(hintId, 10) as 1 | 2 | 3;
-    const currentHint = studentData.hints[id];
+	const refreshStudentData = () => {
+		if (isMockMode) {
+			setStudentData(initialMockData.studentData);
+			return;
+		}
 
-    if (!currentHint || currentHint.isOpen) return;
+		setStudentDataRefreshKey((currentKey) => currentKey + 1);
+	};
 
+	const handleSignOut = async () => {
+		if (isMockMode) {
+			setMockData(null);
+			setStudentData(null);
+			router.refresh();
+			return;
+		}
 
-    const updatedStudentData = {
-      ...studentData,
-      hints: {
-        ...studentData.hints,
-        [id]: { ...currentHint, isOpen: true },
-      },
-    };
+		try {
+			await authClient.signOut();
+			setStudentData(null);
+			router.refresh();
+		} catch (err) {
+			console.error("Sign out failed", err);
+		}
+	};
 
-    setStudentData(updatedStudentData);
+	const markHintAsOpened = async (hintId: string) => {
+		const validIds = ["1", "2", "3"];
+		if (!validIds.includes(hintId) || !studentData) return;
 
-    if (isMockMode) {
-      if (mockData) {
-        setMockData({ ...mockData, studentData: updatedStudentData });
-      }
-      return;
-    }
+		const id = parseInt(hintId, 10) as 1 | 2 | 3;
+		const currentHint = studentData.hints[id];
 
+		if (!currentHint || currentHint.isOpen) return;
 
-    try {
+		const updatedStudentData = {
+			...studentData,
+			hints: {
+				...studentData.hints,
+				[id]: { ...currentHint, isOpen: true },
+			},
+		};
 
-      await fetch(`/api/students/${data?.user?.id}/hints`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ hintId: id, isOpen: true }),
-      });
-    } catch (err) {
-      console.error("Failed to update hint status:", err);
+		setStudentData(updatedStudentData);
 
-    }
-  };
+		if (isMockMode) {
+			if (mockData) {
+				setMockData({ ...mockData, studentData: updatedStudentData });
+			}
+			return;
+		}
 
-  const value = isMockMode
-    ? {
-        session: mockData?.session || null,
-        user: mockData?.user || null,
-        isLoading: false,
-        isStudentLoading: false,
-        error: null,
-        signOut: handleSignOut,
-        studentData: studentData,
-        markHintAsOpened,
-      }
-    : {
-        session: data?.session || null,
-        user: data?.user || null,
-        isLoading: isPending,
-        isStudentLoading: isStudentLoading,
-        error: error || null,
-        signOut: handleSignOut,
-        studentData: studentData,
-        markHintAsOpened,
-      };
+		try {
+			await fetch(`/api/students/${data?.user?.id}/hints`, {
+				method: "PATCH",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ hintId: id, isOpen: true }),
+			});
+		} catch (err) {
+			console.error("Failed to update hint status:", err);
+		}
+	};
 
-  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
+	const value = isMockMode
+		? {
+				session: mockData?.session || null,
+				user: mockData?.user || null,
+				isLoading: false,
+				isStudentLoading: false,
+				error: null,
+				signOut: handleSignOut,
+				studentData: studentData,
+				markHintAsOpened,
+				refreshStudentData,
+			}
+		: {
+				session: data?.session || null,
+				user: data?.user || null,
+				isLoading: isPending,
+				isStudentLoading: isStudentLoading,
+				error: error || null,
+				signOut: handleSignOut,
+				studentData: studentData,
+				markHintAsOpened,
+				refreshStudentData,
+			};
+
+	return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
 
 export const useUser = () => {
-  const context = useContext(UserContext);
-  if (context === undefined) {
-    throw new Error("useUser must be used within a UserProvider");
-  }
-  return context;
+	const context = useContext(UserContext);
+	if (context === undefined) {
+		throw new Error("useUser must be used within a UserProvider");
+	}
+	return context;
 };
