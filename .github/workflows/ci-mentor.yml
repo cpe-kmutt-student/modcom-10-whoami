@@ -42,7 +42,7 @@ jobs:
         id: meta-mentor
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.ACTOR }}/mentor-mentee-mentor
+          images: ${{ env.REGISTRY }}/${{ env.ACTOR }}/whoami-mentor
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=ref,event=branch

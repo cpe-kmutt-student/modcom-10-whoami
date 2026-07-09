@@ -39,7 +39,7 @@ jobs:
         id: meta-web
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.ACTOR }}/mentor-mentee-web
+          images: ${{ env.REGISTRY }}/${{ env.ACTOR }}/whoami-web
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=ref,event=branch
