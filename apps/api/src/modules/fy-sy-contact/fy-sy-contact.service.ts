@@ -14,7 +14,6 @@ export class FySyContactService {
 			const getAllContact = await this.prisma.client.secondYearUser.findMany({
 				omit: {
 					syuser_email: true,
-					syuser_id: true,
 				},
 				include: {
 					sycontact: {
@@ -29,7 +28,9 @@ export class FySyContactService {
 				getAllContact.map(async (c) => {
 					return {
 						...c,
+						syuser_id: null,
 						sycontact_url: c.syuser_profile_key ? await getPreSignUrl(config.backend.s3.bucket, c.syuser_profile_key) : null,
+						sycontact_department: c.syuser_id.slice(7, 9) === "10" ? "Reg" : c.syuser_id.slice(7, 9) === "34" ? "Inter" : c.syuser_id.slice(7, 9) === "52" ? "HDS" : null,
 					};
 				}),
 			);
