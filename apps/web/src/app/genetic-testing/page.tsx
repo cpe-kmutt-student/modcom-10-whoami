@@ -12,12 +12,13 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { Button } from "@/components/ui/button";
 
-import { useState, type ChangeEvent } from "react";
+import { useState, type ChangeEvent, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 
 import { useLoading } from "@/context/ExperienceContext";
 import { Variants } from "motion";
 import { useUser } from "@/context/UserContext";
+import { useTranslations } from "next-intl";
 
 const containerVariants:Variants = {
   hidden: { opacity: 0 },
@@ -38,13 +39,50 @@ const itemVariants:Variants = {
 };
 
 export default function GeneticTesting() {
-  const { showLoading, hideLoading } = useLoading();
-  const { user } = useUser();
-  const router = useRouter();
-  
-  const [nowState, setState] = useState<number>(1);
+  const t = useTranslations();
 
+  const [nowState, setState] = useState<number>(1);
   const [studentId, setStudentId] = useState("");
+
+  /* PROTECTION */
+  const router = useRouter();
+  const { user, studentData, isLoading, isStudentLoading } = useUser();
+  const { showLoading, hideLoading } = useLoading();
+
+  const hasChecked = useRef(false);
+
+  useEffect(() => {
+    const isFetching = isLoading || isStudentLoading;
+
+    if (isFetching) {
+      showLoading();
+      return;
+    }
+
+    hideLoading();
+
+    if (hasChecked.current) return;
+
+    // Perform the one-time check
+    hasChecked.current = true;
+
+    if (!user) {
+      router.replace("/");
+    } else if (studentData) {
+      router.replace("/hint");
+    }
+  }, [
+    isLoading,
+    isStudentLoading,
+    user,
+    studentData,
+    router,
+    showLoading,
+    hideLoading,
+  ]);
+
+  if (isLoading || isStudentLoading || !user || studentData) return null;
+  /* PROTECTION */
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const onlyNums = e.target.value.replace(/[^0-9]/g, "");
@@ -74,7 +112,6 @@ export default function GeneticTesting() {
 
   return (
     <div className="min-h-screen relative overflow-hidden flex flex-col justify-center items-center p-3 bg-blue-50">
-
       <AnimatePresence mode="wait">
         <div className="z-10 w-full flex justify-center">
           {(() => {
@@ -94,13 +131,15 @@ export default function GeneticTesting() {
                         variants={itemVariants}
                         className="text-3xl font-bold font-display text-blue-900"
                       >
-                        สวัสดี,
+                        {t("genetic_testing.hello")}
                       </motion.div>
                       <motion.div
                         variants={itemVariants}
                         className="text-2xl font-sans text-blue-900"
                       >
-                        น้อง {user?.name}
+                        {t("genetic_testing.name", {
+                          fullname: user?.name ?? "",
+                        })}
                       </motion.div>
                     </div>
 
@@ -109,12 +148,12 @@ export default function GeneticTesting() {
                       className="flex flex-col gap-3"
                     >
                       <p className="pb-1 text-lg font-bold leading-none text-blue-900">
-                        นี่คือชื่อของน้องใช่ไหม?
+                        {t("genetic_testing.is_your_name")}
                       </p>
 
                       <Button onClick={() => setState(2)}>
                         <FontAwesomeIcon icon={faHandshake} className="mr-2" />
-                        ยืนยัน นี่คือชื่อของฉัน
+                        {t("genetic_testing.confirm")}
                       </Button>
 
                       <Button
@@ -122,7 +161,7 @@ export default function GeneticTesting() {
                         variant="ghost_danger"
                         className="h-12 w-full border-2 border-oops hover:bg-oops/10"
                       >
-                        ไม่ใช่ นี่ไม่ใช่ชื่อฉัน !!!
+                        {t("genetic_testing.deny")}
                       </Button>
                     </motion.div>
                   </motion.div>
@@ -148,13 +187,13 @@ export default function GeneticTesting() {
                         className="flex flex-col justify-center gap-2 w-full"
                       >
                         <Label htmlFor="name" className="text-lg">
-                          รหัสนักศึกษา
+                          {t("genetic_testing.student_id")}
                         </Label>
                         <Input
                           id="name"
                           type="text"
                           inputMode="numeric"
-                          placeholder="กรอกรหัสนักศึกษา 11 หลัก..."
+                          placeholder={t("genetic_testing.input_student_id")}
                           value={studentId}
                           onChange={handleChange}
                         />
@@ -170,17 +209,13 @@ export default function GeneticTesting() {
                         icon={faPersonWalking}
                         className="mr-2"
                       />
-                      เดินทางไปด้วยกัน
+                      {t("genetic_testing.verify")}
                     </Button>
                   </motion.div>
                 );
 
               case 3:
-                return (
-                  <div className="opacity-0">
-                    loading...
-                  </div>
-                );
+                return <div className="opacity-0">loading...</div>;
 
               case 4:
                 return (
@@ -204,15 +239,15 @@ export default function GeneticTesting() {
                       variants={itemVariants}
                       className="text-3xl font-bold font-mali text-oops"
                     >
-                      แย่จัง
+                      {t("genetic_testing.access_denied")}
                     </motion.h2>
                     <motion.div
                       variants={itemVariants}
                       className="text-lg font-sans text-blue-900"
                     >
-                      โปรดตรวจสอบรหัสนักศึกษาอีกครั้ง
+                      {t("genetic_testing.recheck")}
                       <div className="text-sm opacity-50 mt-2">
-                        หากถูกต้องแล้ว สามารถติดต่อพี่ ๆ ได้เลย
+                        {t("genetic_testing.it_correct")}
                       </div>
                     </motion.div>
 
@@ -231,7 +266,7 @@ export default function GeneticTesting() {
                           icon={faRotateRight}
                           className="mr-2"
                         />
-                        ย้อนกลับ
+                        {t("genetic_testing.back")}
                       </Button>
                     </motion.div>
                   </motion.div>

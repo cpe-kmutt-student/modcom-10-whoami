@@ -13,8 +13,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/context/UserContext";
 
+import { useTranslations } from "next-intl";
+
 export default function UserProfile() {
-  const { studentData, user } = useUser();
+  const t = useTranslations();
+
+  const { studentData, user, signOut } = useUser();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -29,7 +33,7 @@ export default function UserProfile() {
   }, []);
 
   const handleLogout = () => {
-    alert("logout มาแก้ด้วย");
+    signOut();
   };
 
   return (
@@ -55,7 +59,10 @@ export default function UserProfile() {
 
         <div className="hidden md:flex flex-col items-start">
           <span className="text-sm font-bold font-mali text-blue-900 leading-tight">
-            น้อง {studentData?.name.split(" ")[0]}
+            {t("user_profile.name", {
+              firstname: studentData?.name.split(" ")[0] ?? "",
+              fullname: studentData?.name ?? "",
+            })}
           </span>
           <span className="text-[10px] font-sans font-bold text-blue-600 leading-tight">
             {studentData?.studentID}
@@ -86,7 +93,7 @@ export default function UserProfile() {
                   {studentData?.name}
                 </span>
                 <span className="text-xs font-sans font-bold text-blue-500">
-                  หลักสูตรปกติ
+                  {t("program.full." + studentData?.program)}
                 </span>
               </div>
 
@@ -113,7 +120,7 @@ export default function UserProfile() {
                 className="w-full flex items-center justify-center gap-2  text-white py-3 rounded-xl border-2 "
               >
                 <FontAwesomeIcon icon={faRightFromBracket} />
-                ออกจากระบบ (Logout)
+                {t("user_profile.logout")}
               </Button>
             </div>
           </motion.div>

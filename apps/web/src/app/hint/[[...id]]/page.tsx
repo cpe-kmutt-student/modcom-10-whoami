@@ -3,15 +3,17 @@ import UserProfile from "@/components/UserProfile";
 import { Button } from "@/components/ui/button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPeopleGroup } from "@fortawesome/free-solid-svg-icons";
-import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
+import { motion, AnimatePresence, LayoutGroup } from "motion/react";
 
 import { useRouter, useParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useUser } from "@/context/UserContext";
 import ParcelScene from "@/components/ParcelScene";
 import BackButton from "@/components/BackButton";
 import ParticlesBackground from "@/components/ParticlesBackground";
 import { Variants } from "motion";
+import { useLoading } from "@/context/ExperienceContext";
+import { useTranslations } from "next-intl";
 
 const VALID_HINTS = ['1', '2', '3'];
 
@@ -92,22 +94,65 @@ function HintFlipCard({ hintImage, isFlipped }: { hintImage: string, isFlipped: 
 }
 
 export default function Hint() {
+  const t = useTranslations();
+
   const params = useParams();
   const rawId = params?.id?.[0] || null;
   const isValid = rawId ? VALID_HINTS.includes(rawId) : false;
 
-  const [activeHintId, setActiveHintId] = useState<string | null>(isValid ? rawId : null);
+  const [activeHintId, setActiveHintId] = useState<string | null>(
+    isValid ? rawId : null,
+  );
   const [isFlipped, setIsFlipped] = useState(false);
 
+  /* PROTECTION */
   const router = useRouter();
-  const { studentData, markHintAsOpened } = useUser();
+  const { user, studentData, isLoading, isStudentLoading, markHintAsOpened } =
+    useUser();
+
+  const { showLoading, hideLoading } = useLoading();
+
+  const hasChecked = useRef(false);
+
+  useEffect(() => {
+    const isFetching = isLoading || isStudentLoading;
+
+    if (isFetching) {
+      showLoading();
+      return;
+    }
+
+    hideLoading();
+
+    if (hasChecked.current) return;
+
+    hasChecked.current = true;
+
+    if (!user) {
+      router.replace("/");
+    } else if (!studentData) {
+      router.replace("/genetic-testing");
+    }
+  }, [
+    isLoading,
+    isStudentLoading,
+    user,
+    studentData,
+    router,
+    showLoading,
+    hideLoading,
+  ]);
+
+  if (isLoading || isStudentLoading || !user || !studentData) return null;
+  /* PROTECTION */
+
   const hints = studentData?.hints;
 
-
-  const unopenedHintEntry = Object.entries(hints || {}).find(([id, hint]) => hint !== null && hint.isOpen === false);
+  const unopenedHintEntry = Object.entries(hints || {}).find(
+    ([id, hint]) => hint !== null && hint.isOpen === false,
+  );
   const unopenedHintId = unopenedHintEntry ? unopenedHintEntry[0] : null;
   const unopenedHint = unopenedHintEntry ? unopenedHintEntry[1] : null;
-
 
   const availableHints = Object.entries(hints || {})
     .filter(([id, hint]) => hint !== null)
@@ -119,9 +164,9 @@ export default function Hint() {
     if (rawId && hints) {
       const hintObj = hints[rawId as unknown as 1 | 2 | 3];
       const isValidAndOpened = VALID_HINTS.includes(rawId) && hintObj?.isOpen;
-      
+
       if (!isValidAndOpened) {
-        window.history.replaceState(null, '', '/hint');
+        window.history.replaceState(null, "", "/hint");
         setActiveHintId(null);
       }
     }
@@ -152,10 +197,10 @@ export default function Hint() {
   const openHint = (id: string) => {
     const hintObj = hints?.[id as unknown as 1 | 2 | 3];
     if (!VALID_HINTS.includes(id) || !hintObj?.isOpen) return;
-    
+
     setActiveHintId(id);
     setIsFlipped(false);
-    window.history.pushState(null, '', `/hint/${id}`);
+    window.history.pushState(null, "", `/hint/${id}`);
   };
 
   const closeHint = () => {
@@ -172,7 +217,9 @@ export default function Hint() {
       <div
         className={`w-full bg-blue-50 relative selection:bg-quirky selection:text-blue-900 ${!showGrid ? "h-[100dvh] overflow-hidden" : "min-h-[100dvh]"}`}
       >
-        <code className="hidden">hint: แน่จริงก็หาให้เจอสิ จาก dev ท่านหนึ่ง</code>
+        <code className="hidden">
+          hint: แน่จริงก็หาให้เจอสิ จาก dev ท่านหนึ่ง
+        </code>
 
         {showBox && (
           <div className="fixed inset-0 z-40">
@@ -193,7 +240,6 @@ export default function Hint() {
           </div>
         )}
 
-
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: showGrid ? 1 : 0 }}
@@ -201,7 +247,6 @@ export default function Hint() {
           className={`relative z-10 flex flex-col min-h-[100dvh] w-full ${showGrid ? "" : "pointer-events-none"}`}
         >
           <UserProfile />
-
 
           <div className="flex-1 flex flex-col items-center justify-center pointer-events-none z-10 py-24 pb-32">
             <div className="w-full max-w-6xl px-10 mx-auto flex flex-wrap justify-center gap-10 md:gap-20">
@@ -211,7 +256,6 @@ export default function Hint() {
                   className="relative flex flex-col justify-center items-center pointer-events-auto flex-none w-full md:w-[calc(33.333%-53.33px)] max-w-[360px]"
                 >
                   <div className="absolute bg-blue-950 w-[80%] aspect-square rounded-full -z-10"></div>
-
 
                   {activeHintId !== id && !showBox && (
                     <motion.div
@@ -259,7 +303,8 @@ export default function Hint() {
               }}
             >
               <FontAwesomeIcon icon={faPeopleGroup} className="md:mr-2" />
-              <span className="hidden md:flex">รายชื่อพี่</span>
+              <span className="hidden md:flex">{t("hint.mentor_name_list")}
+              </span>
             </Button>
           </motion.div>
 
@@ -268,14 +313,12 @@ export default function Hint() {
           </footer>
         </motion.div>
 
-
         <AnimatePresence>
           {activeHintId && activeHintObj?.hint.isOpen && (
             <motion.div
               key="full-screen-wrapper"
               className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none"
             >
-
               <motion.div
                 variants={backgroundVarient}
                 initial="hidden"
@@ -288,7 +331,6 @@ export default function Hint() {
                   <ParticlesBackground />
                 </div>
               </motion.div>
-
 
               <div
                 className="absolute inset-2 flex items-center justify-center pointer-events-none z-30"
