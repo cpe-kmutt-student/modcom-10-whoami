@@ -104,7 +104,11 @@ const mapSeniorContacts = (contacts: FySeniorContactResponse): UserData[] => {
 		return {
 			id: contact.syuser_uuid || `senior-${index}`,
 			name:
-				[contact.syuser_firstname, contact.syuser_lastname]
+				[
+					`(${contact.syuser_nickname})`,
+					contact.syuser_firstname,
+					contact.syuser_lastname,
+				]
 					.filter(Boolean)
 					.join(" ") ||
 				contact.syuser_nickname ||
