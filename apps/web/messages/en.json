@@ -23,10 +23,13 @@
   },
   "hint": {
     "mentor_name_list": "Mentor List",
-    "open_box": "Open the box!"
+    "open_box": "Open the box!",
+    "no_hint": "Still no hint. Did your mentor forget?"
   },
   "list": {
-    "mentor_name_list": "Mentor List"
+    "mentor_name_list": "Mentor List",
+    "loading": "Loading mentor list...",
+    "notfound": "No mentors found in the selected category."
   },
   "not_found": {
     "oops": "Oops!!",

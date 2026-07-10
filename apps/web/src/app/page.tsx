@@ -4,42 +4,20 @@ import Image from "next/image";
 import ParticlesBackground from "@/components/ParticlesBackground";
 import AnnoyingStickers from "@/components/AnnoyingSticker";
 import { authClient } from "@/lib/auth-client";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
-import { useUser } from "@/context/UserContext";
 import { useTranslations } from "next-intl";
+
+import { useGuestGuard } from "@/hooks/useRouteGuard";
 
 export default function Home() {
   const t = useTranslations();
 
+  const { isChecking } = useGuestGuard();
+
   const router = useRouter();
   const [isClickingLogin, setIsClickingLogin] = useState(false);
-
-  /* PROTECTION */
-  const {
-    user,
-    studentData,
-    isLoading: userPending,
-    isStudentLoading,
-  } = useUser();
-  const hasChecked = useRef(false);
-
-  useEffect(() => {
-    if (userPending || isStudentLoading) return;
-
-    if (hasChecked.current) return;
-    hasChecked.current = true;
-
-    if (user) {
-      if (studentData) {
-        router.replace("/hint");
-      } else {
-        router.replace("/genetic-testing");
-      }
-    }
-  }, [userPending, isStudentLoading, user, studentData, router]);
-  /* PROTECTION */
 
   const login = async () => {
     try {
@@ -50,14 +28,11 @@ export default function Home() {
       });
     } catch (error) {
       console.error("Login failed", error);
-      // Only stop the spinner if the login actually failed
       setIsClickingLogin(false);
     }
   };
 
-  const isRedirecting = user !== null;
-  const showSpinner =
-    userPending || isStudentLoading || isClickingLogin || isRedirecting;
+  const showSpinner = isClickingLogin || isChecking;
 
   return (
     <div className="bg-blue-50 min-h-screen relative overflow-hidden">

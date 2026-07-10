@@ -20,6 +20,8 @@ import { Variants } from "motion";
 import { useUser } from "@/context/UserContext";
 import { useTranslations } from "next-intl";
 
+import { useVerifyGuard } from "@/hooks/useRouteGuard";
+
 const containerVariants:Variants = {
   hidden: { opacity: 0 },
   show: {
@@ -39,13 +41,13 @@ const itemVariants:Variants = {
 };
 
 export default function GeneticTesting() {
+  const { isChecking } = useVerifyGuard();
+
   const t = useTranslations();
 
   const [nowState, setState] = useState<number>(1);
   const [studentId, setStudentId] = useState("");
 
-  /* PROTECTION */
-  const router = useRouter();
   const {
     user,
     studentData,
@@ -55,40 +57,7 @@ export default function GeneticTesting() {
     refreshStudentData,
   } = useUser();
   const { showLoading, hideLoading } = useLoading();
-
-  const hasChecked = useRef(false);
-
-  useEffect(() => {
-    const isFetching = isLoading || isStudentLoading;
-
-    if (isFetching) {
-      showLoading();
-      return;
-    }
-
-    hideLoading();
-
-    if (hasChecked.current) return;
-
-    hasChecked.current = true;
-
-    if (!user) {
-      router.replace("/");
-    } else if (studentData) {
-      router.replace("/hint");
-    }
-  }, [
-    isLoading,
-    isStudentLoading,
-    user,
-    studentData,
-    router,
-    showLoading,
-    hideLoading,
-  ]);
-
-  if (isLoading || isStudentLoading || !user || studentData) return null;
-  /* PROTECTION */
+  const router = useRouter();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const onlyNums = e.target.value.replace(/[^0-9]/g, "");
@@ -136,6 +105,8 @@ export default function GeneticTesting() {
     void linkAccount();
   };
 
+  if (isChecking) return null;
+
   return (
     <div className="min-h-screen relative overflow-hidden flex flex-col justify-center items-center p-3 bg-blue-50">
       <AnimatePresence mode="wait">
@@ -164,7 +135,11 @@ export default function GeneticTesting() {
                         className="text-2xl font-sans text-blue-900"
                       >
                         {t("genetic_testing.name", {
-                          fullname: user?.name.toLowerCase().replace(/\b\w/g, char => char.toUpperCase()) ?? "",
+                          fullname:
+                            user?.name
+                              .toLowerCase()
+                              .replace(/\b\w/g, (char) => char.toUpperCase()) ??
+                            "",
                         })}
                       </motion.div>
                     </div>

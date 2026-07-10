@@ -97,7 +97,14 @@ const mapProfileAndQuestsToStudentData = (
   return {
     studentID: fyuser.fyuser_id,
     name: fullName || fyuser.fyuser_id,
-    program: "",
+    program:
+      fyuser.fyuser_id.slice(7, 9) === "10"
+        ? "reg"
+        : fyuser.fyuser_id.slice(7, 9) === "34"
+          ? "inter"
+          : fyuser.fyuser_id.slice(7, 9) === "52"
+            ? "hds"
+            : "",
     hints,
   };
 };
@@ -144,7 +151,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [studentData, setStudentData] = useState<StudentData | null>(() =>
     isMockMode ? initialMockData.studentData : null,
   );
-  const [isStudentLoading, setIsStudentLoading] = useState<boolean>(false);
+  const [isStudentLoading, setIsStudentLoading] = useState<boolean>(!isMockMode);
 
   const [mockData, setMockData] = useState<{
     session: Session["session"];
@@ -157,6 +164,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (isMockMode) return;
 
+    if (isPending) {
+      setIsStudentLoading(true);
+      return;
+    }
+
     if (data?.user?.id) {
       const fetchStudentData = async () => {
         setIsStudentLoading(true);
@@ -165,15 +177,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           const [profileResponse, questResponse] = await Promise.all([
             fetch(
               `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/_/fy/account/profile`,
-              {
-                credentials: "include",
-              },
+              { credentials: "include" },
             ),
             fetch(
               `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/_/fy/quest/`,
-              {
-                credentials: "include",
-              },
+              { credentials: "include" },
             ),
           ]);
 
@@ -201,8 +209,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
       fetchStudentData();
     } else {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStudentData(null);
+
+      setIsStudentLoading(false);
     }
   }, [data?.user?.id, isPending, studentDataRefreshKey]);
 
@@ -219,14 +228,14 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     if (isMockMode) {
       setMockData(null);
       setStudentData(null);
-      router.refresh();
+      router.push("/");
       return;
     }
 
     try {
       await authClient.signOut();
       setStudentData(null);
-      router.refresh();
+      router.push("/");
     } catch (err) {
       console.error("Sign out failed", err);
     }
@@ -258,16 +267,19 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    try {
-      await fetch(`/api/students/${data?.user?.id}/hints`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ hintId: id, isOpen: true }),
-      });
-    } catch (err) {
-      console.error("Failed to update hint status:", err);
-    }
-  };
+		try {
+			await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/_/fy/quest/opened/${id}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include"
+        },
+      );
+		} catch (err) {
+			console.error("Failed to update hint status:", err);
+		}
+	};
 
   const value = isMockMode
     ? {
@@ -294,7 +306,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
-};
+};;
 
 export const useUser = () => {
   const context = useContext(UserContext);

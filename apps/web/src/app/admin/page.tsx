@@ -46,7 +46,7 @@ export default function FakeAdminLogin() {
         </div>
 
         <div className="bg-white border-4 border-blue-900 rounded-3xl p-8 pt-10 shadow-[8px_8px_0px_0px_var(--color-quirky)] flex flex-col gap-6">
-          {/* Header */}
+
           <div className="text-center flex flex-col items-center gap-2">
             <div className="w-16 h-16 bg-blue-100 border-3 border-blue-900 rounded-full flex items-center justify-center text-blue-900 mb-2">
               <FontAwesomeIcon icon={faUserShield} className="text-3xl" />
