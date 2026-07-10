@@ -31,7 +31,7 @@ export function ExperienceProvider({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const activeRequests = useRef<number>(0);
 
-  const MIN_LOADING_TIME = 800;
+  const MIN_LOADING_TIME = 1000;
 
   const showLoading = useCallback(() => {
     activeRequests.current += 1;

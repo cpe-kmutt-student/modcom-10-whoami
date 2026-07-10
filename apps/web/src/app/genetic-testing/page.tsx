@@ -46,7 +46,14 @@ export default function GeneticTesting() {
 
   /* PROTECTION */
   const router = useRouter();
-  const { user, studentData, isLoading, isStudentLoading } = useUser();
+  const {
+    user,
+    studentData,
+    isLoading,
+    isStudentLoading,
+    signOut,
+    refreshStudentData,
+  } = useUser();
   const { showLoading, hideLoading } = useLoading();
 
   const hasChecked = useRef(false);
@@ -63,7 +70,6 @@ export default function GeneticTesting() {
 
     if (hasChecked.current) return;
 
-    // Perform the one-time check
     hasChecked.current = true;
 
     if (!user) {
@@ -95,19 +101,39 @@ export default function GeneticTesting() {
   const handleVerify = () => {
     showLoading();
 
-    alert(studentId);
-
     setState(3);
 
-    setTimeout(() => {
-      const mockApiSuccess = Math.random() > 0.5;
-      hideLoading();
-      if (mockApiSuccess) {
+    const linkAccount = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/_/fy/account/link`,
+          {
+            method: "POST",
+            credentials: "include",
+            body: JSON.stringify({
+              student_id: studentId,
+            }),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to link account");
+        }
+
+        refreshStudentData();
         router.push("/hint");
-      } else {
+      } catch (error) {
+        console.error("Link account failed:", error);
         setState(4);
+      } finally {
+        hideLoading();
       }
-    }, 10000);
+    };
+
+    void linkAccount();
   };
 
   return (
@@ -138,7 +164,7 @@ export default function GeneticTesting() {
                         className="text-2xl font-sans text-blue-900"
                       >
                         {t("genetic_testing.name", {
-                          fullname: user?.name ?? "",
+                          fullname: user?.name.toLowerCase().replace(/\b\w/g, char => char.toUpperCase()) ?? "",
                         })}
                       </motion.div>
                     </div>
@@ -157,7 +183,7 @@ export default function GeneticTesting() {
                       </Button>
 
                       <Button
-                        onClick={() => router.push("/")}
+                        onClick={signOut}
                         variant="ghost_danger"
                         className="h-12 w-full border-2 border-oops hover:bg-oops/10"
                       >

@@ -28,7 +28,9 @@
     "open_box": "เปิดกล่องเลย !"
   },
   "list": {
-    "mentor_name_list": "รายชื่อพี่"
+    "mentor_name_list": "รายชื่อพี่",
+    "loading": "กำลังโหลดรายชื่อพี่...",
+    "notfound": "ไม่พบรายชื่อพี่ในหมวดที่เลือก"
   },
   "not_found": {
     "oops": "Oops!!",

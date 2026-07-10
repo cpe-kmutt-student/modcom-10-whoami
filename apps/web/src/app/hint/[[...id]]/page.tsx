@@ -143,22 +143,7 @@ export default function Hint() {
     hideLoading,
   ]);
 
-  if (isLoading || isStudentLoading || !user || !studentData) return null;
-  /* PROTECTION */
-
   const hints = studentData?.hints;
-
-  const unopenedHintEntry = Object.entries(hints || {}).find(
-    ([id, hint]) => hint !== null && hint.isOpen === false,
-  );
-  const unopenedHintId = unopenedHintEntry ? unopenedHintEntry[0] : null;
-  const unopenedHint = unopenedHintEntry ? unopenedHintEntry[1] : null;
-
-  const availableHints = Object.entries(hints || {})
-    .filter(([id, hint]) => hint !== null)
-    .map(([id, hint]) => ({ id, hint: hint! }));
-
-  const activeHintObj = availableHints.find((h) => h.id === activeHintId);
 
   useEffect(() => {
     if (rawId && hints) {
@@ -167,6 +152,7 @@ export default function Hint() {
 
       if (!isValidAndOpened) {
         window.history.replaceState(null, "", "/hint");
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setActiveHintId(null);
       }
     }
@@ -193,6 +179,23 @@ export default function Hint() {
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
+
+  if (isLoading || isStudentLoading || !user || !studentData) return null;
+  /* PROTECTION */
+
+
+
+  const unopenedHintEntry = Object.entries(hints || {}).find(
+    ([id, hint]) => hint !== null && hint.isOpen === false,
+  );
+  const unopenedHintId = unopenedHintEntry ? unopenedHintEntry[0] : null;
+  const unopenedHint = unopenedHintEntry ? unopenedHintEntry[1] : null;
+
+  const availableHints = Object.entries(hints || {})
+    .filter(([id, hint]) => hint !== null)
+    .map(([id, hint]) => ({ id, hint: hint! }));
+
+  const activeHintObj = availableHints.find((h) => h.id === activeHintId);
 
   const openHint = (id: string) => {
     const hintObj = hints?.[id as unknown as 1 | 2 | 3];

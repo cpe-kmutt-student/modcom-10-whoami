@@ -29,124 +29,103 @@ export interface UserSocials {
   facebook?: SocialPlatform;
   discord?: SocialPlatform;
   line?: SocialPlatform;
+  other?: Array<SocialPlatform & { platform: string }>;
 }
 
 export interface UserData {
-  id: number;
+  id: string;
   name: string;
   program: string;
   imageUrl: string;
   socials?: UserSocials;
 }
 
-const ppsData: UserData[] = [
-  {
-    id: 1,
-    name: "ต้มยำ",
-    program: "reg",
-    imageUrl: "https://i.pravatar.cc/150?u=lelah",
-    socials: {
-      discord: { username: "@lelah_n", url: "https://line.me" },
-    },
-  },
-  {
-    id: 2,
-    name: "กะเพรา",
-    program: "inter",
-    imageUrl: "https://i.pravatar.cc/150?u=jesus",
-    socials: {
-      instagram: { username: "@lelah.n", url: "https://instagram.com" },
-    },
-  },
-  {
-    id: 3,
-    name: "ส้มตำ",
-    program: "inter",
+type FySeniorContactResponse = Array<{
+  syuser_uuid: string;
+  syuser_nickname: string | null;
+  syuser_firstname: string | null;
+  syuser_lastname: string | null;
+  sycontact_url: string | null;
+  sycontact_department: string | null;
+  sycontact: Array<{
+    sycontact_platform: string;
+    sycontact_detail: string;
+  }>;
+}>;
 
-    imageUrl: "https://i.pravatar.cc/150?u=annie",
-  },
-  {
-    id: 4,
-    name: "Sigma",
-    program: "hds",
-    imageUrl: "https://i.pravatar.cc/150?u=robert",
-    socials: {
-      line: { username: "@lelah_n", url: "https://line.me" },
-    },
-  },
-  {
-    id: 5,
-    name: "uu",
-    program: "reg",
+type ContactKey = Exclude<keyof UserSocials, "other">;
 
-    imageUrl: "https://i.pravatar.cc/150?u=amy",
-  },
-  {
-    id: 6,
-    name: "เกีย",
-    program: "reg",
-    imageUrl: "https://i.pravatar.cc/150?u=anthony",
-    socials: {
-      facebook: { username: "Lelah N.", url: "https://facebook.com" },
-    },
-  },
-  {
-    id: 7,
-    name: "เกีย",
-    program: "reg",
-    imageUrl: "https://i.pravatar.cc/150?u=anthony",
-    socials: {
-      facebook: { username: "Lelah N.", url: "https://facebook.com" },
-    },
-  },
-  {
-    id: 8,
-    name: "เกีย",
-    program: "reg",
-    imageUrl: "https://i.pravatar.cc/150?u=anthony",
-    socials: {
-      facebook: { username: "Lelah N.", url: "https://facebook.com" },
-    },
-  },
-  {
-    id: 9,
-    name: "เกีย",
-    program: "reg",
-    imageUrl: "https://i.pravatar.cc/150?u=anthony",
-    socials: {
-      facebook: { username: "Lelah N.", url: "https://facebook.com" },
-    },
-  },
-  {
-    id: 10,
-    name: "เกีย",
-    program: "reg",
-    imageUrl: "https://i.pravatar.cc/150?u=anthony",
-    socials: {
-      facebook: { username: "Lelah N.", url: "https://facebook.com" },
-    },
-  },
-  {
-    id: 11,
-    name: "เกีย",
-    program: "reg",
-    imageUrl: "https://i.pravatar.cc/150?u=anthony",
-    socials: {
-      facebook: { username: "Lelah N.", url: "https://facebook.com" },
-    },
-  },
-  {
-    id: 12,
-    name: "เกีย",
-    program: "reg",
-    imageUrl: "https://i.pravatar.cc/150?u=anthony",
-    socials: {
-      facebook: { username: "Lelah N.", url: "https://facebook.com" },
-    },
-  },
+const contactPlatformMap: Record<string, ContactKey> = {
+  instagram: "instagram",
+  facebook: "facebook",
+  discord: "discord",
+  line: "line",
+};
 
-];
+const buildSocialUrl = (platform: string, detail: string) => {
+  if (platform === "instagram")
+    return `https://instagram.com/${detail.replace(/^@/, "")}`;
+  if (platform === "facebook") return `https://facebook.com/${detail}`;
+  if (platform === "discord") return "https://discord.com";
+  if (platform === "line")
+    return `https://line.me/R/ti/p/${detail.replace(/^@/, "")}`;
 
+  if (detail.startsWith("http://") || detail.startsWith("https://")) {
+    return detail;
+  }
+
+  return `https://${detail.replace(/^@/, "")}`;
+};
+
+const mapSeniorContacts = (contacts: FySeniorContactResponse): UserData[] => {
+  return contacts.map((contact, index) => {
+    const socials = contact.sycontact.reduce<UserSocials>(
+      (accumulator, item) => {
+        const normalizedPlatform = item.sycontact_platform.toLowerCase();
+        const mappedPlatform = contactPlatformMap[normalizedPlatform];
+
+        if (mappedPlatform) {
+          accumulator[mappedPlatform] = {
+            username: item.sycontact_detail,
+            url: buildSocialUrl(mappedPlatform, item.sycontact_detail),
+          };
+          return accumulator;
+        }
+
+        accumulator.other = [
+          ...(accumulator.other || []),
+          {
+            platform: item.sycontact_platform,
+            username: item.sycontact_detail,
+            url: buildSocialUrl(normalizedPlatform, item.sycontact_detail),
+          },
+        ];
+
+        return accumulator;
+      },
+      {},
+    );
+
+    return {
+      id: contact.syuser_uuid || `senior-${index}`,
+      name:
+        [
+          `(${contact.syuser_nickname})`,
+          contact.syuser_firstname,
+          contact.syuser_lastname,
+        ]
+          .filter(Boolean)
+          .join(" ") ||
+        contact.syuser_nickname ||
+        "Unknown",
+      program: contact.sycontact_department || "Unknown",
+      imageUrl:
+        contact.sycontact_url ||
+        `https://i.pravatar.cc/150?u=${contact.syuser_uuid}`,
+      socials: Object.keys(socials).length > 0 ? socials : undefined,
+    };
+  });
+};
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -187,7 +166,41 @@ const itemVariants: Variants = {
 
 export default function List() {
   const t = useTranslations();
+
+  const [seniorContacts, setSeniorContacts] = useState<UserData[]>([]);
   const [selectedPrograms, setSelectedPrograms] = useState<string[]>([]);
+  const [isDataLoading, setDataIsLoading] = useState(true);
+
+
+  useEffect(() => {
+    const fetchSeniorContacts = async () => {
+      setDataIsLoading(true);
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/_/fy/sy/contact/`,
+          {
+            credentials: "include",
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch senior contacts");
+        }
+
+        const data = (await response.json()) as FySeniorContactResponse;
+        setSeniorContacts(mapSeniorContacts(data));
+      } catch (error) {
+        console.error("Failed to load senior contacts:", error);
+        setSeniorContacts([]);
+      } finally {
+        setDataIsLoading(false);
+      }
+    };
+
+    fetchSeniorContacts();
+  }, []);
+
   /* PROTECTION */
   const router = useRouter();
 
@@ -234,7 +247,7 @@ export default function List() {
 
 
 
-  const filteredData = ppsData.filter((pData) => {
+  const filteredData = seniorContacts.filter((pData) => {
     if (selectedPrograms.length === 0) return true;
     return selectedPrograms.includes(pData.program);
   });
@@ -296,98 +309,116 @@ export default function List() {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:gap-6 gap-3 pt-5 pb-20 w-full"
         >
           <AnimatePresence mode="popLayout">
-            {filteredData.map((pData, index) => (
+            {isDataLoading ? (
               <motion.div
-                layout
-                custom={index}
-                variants={itemVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                key={pData.id}
-                className="flex items-start p-6 rounded-3xl border-2 border-blue-900 bg-cloud text-blue-900 shadow-comic"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="col-span-full rounded-3xl border-2 border-blue-900 bg-cloud px-6 py-10 text-center text-blue-900 shadow-comic"
               >
-                <Image
-                  src={pData.imageUrl}
-                  alt={pData.name}
-                  width={64}
-                  height={64}
-                  className="w-16 h-16 rounded-full object-cover mr-4 shrink-0"
-                />
-
-                <div className="flex flex-col min-w-0">
-                  <div className="flex flex-row items-center gap-1.5">
-                    <h3 className="text-base font-bold text-gray-900 truncate">
-                      {pData.name}
-                    </h3>
-                    <div className="select-none inline-flex h-auto items-center px-2 py-0.5 rounded-full text-[10px] font-medium border border-indigo-200 text-indigo-500 bg-white">
-                      {t("program.short." + pData.program)}
-                    </div>
-                  </div>
-
-                  {pData.socials && Object.keys(pData.socials).length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-auto pt-3">
-                      {pData.socials.instagram && (
-                        <a
-                          href={pData.socials.instagram.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center pl-2 pr-2.5 py-1 rounded-full text-[10px] font-medium text-white bg-linear-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] hover:opacity-80 transition-opacity"
-                        >
-                          <FontAwesomeIcon
-                            icon={faInstagram}
-                            className="mr-1.5"
-                          />
-                          {pData.socials.instagram.username}
-                        </a>
-                      )}
-
-                      {pData.socials.facebook && (
-                        <a
-                          href={pData.socials.facebook.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center pl-2 pr-2.5 py-1 rounded-full text-[10px] font-medium text-white bg-[#1877F2] hover:opacity-80 transition-opacity"
-                        >
-                          <FontAwesomeIcon
-                            icon={faFacebook}
-                            className="mr-1.5"
-                          />
-                          {pData.socials.facebook.username}
-                        </a>
-                      )}
-
-                      {pData.socials.discord && (
-                        <a
-                          href={pData.socials.discord.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center pl-2 pr-2.5 py-1 rounded-full text-[10px] font-medium text-white bg-[#5865F2] hover:opacity-80 transition-opacity"
-                        >
-                          <FontAwesomeIcon
-                            icon={faDiscord}
-                            className="mr-1.5"
-                          />
-                          {pData.socials.discord.username}
-                        </a>
-                      )}
-
-                      {pData.socials.line && (
-                        <a
-                          href={pData.socials.line.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center pl-2 pr-2.5 py-1 rounded-full text-[10px] font-medium text-white bg-[#00C300] hover:opacity-80 transition-opacity"
-                        >
-                          <FontAwesomeIcon icon={faLine} className="mr-1.5" />
-                          {pData.socials.line.username}
-                        </a>
-                      )}
-                    </div>
-                  )}
-                </div>
+                {t("list.loading")}
               </motion.div>
-            ))}
+            ) : filteredData.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="col-span-full rounded-3xl border-2 border-blue-900 bg-cloud px-6 py-10 text-center text-blue-900 shadow-comic"
+              >
+                {t("list.notfound")}
+              </motion.div>
+            ) : (
+              filteredData.map((pData, index) => (
+                <motion.div
+                  layout
+                  custom={index}
+                  variants={itemVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  key={pData.id}
+                  className="flex items-start p-6 rounded-3xl border-2 border-blue-900 bg-cloud text-blue-900 shadow-comic"
+                >
+                  <Image
+                    src={pData.imageUrl}
+                    alt={pData.name}
+                    width={64}
+                    height={64}
+                    className="w-16 h-16 rounded-full object-cover mr-4 shrink-0"
+                  />
+
+                  <div className="flex flex-col min-w-0">
+                    <div className="flex flex-row items-center gap-1.5">
+                      <h3 className="text-base font-bold text-gray-900 truncate">
+                        {pData.name}
+                      </h3>
+                      <div className="select-none inline-flex h-auto items-center px-2 py-0.5 rounded-full text-[10px] font-medium border border-indigo-200 text-indigo-500 bg-white">
+                        {t("program.short." + pData.program)}
+                      </div>
+                    </div>
+
+                    {pData.socials && Object.keys(pData.socials).length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-auto pt-3">
+                        {pData.socials.instagram && (
+                          <a
+                            href={pData.socials.instagram.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center pl-2 pr-2.5 py-1 rounded-full text-[10px] font-medium text-white bg-linear-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] hover:opacity-80 transition-opacity"
+                          >
+                            <FontAwesomeIcon
+                              icon={faInstagram}
+                              className="mr-1.5"
+                            />
+                            {pData.socials.instagram.username}
+                          </a>
+                        )}
+
+                        {pData.socials.facebook && (
+                          <a
+                            href={pData.socials.facebook.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center pl-2 pr-2.5 py-1 rounded-full text-[10px] font-medium text-white bg-[#1877F2] hover:opacity-80 transition-opacity"
+                          >
+                            <FontAwesomeIcon
+                              icon={faFacebook}
+                              className="mr-1.5"
+                            />
+                            {pData.socials.facebook.username}
+                          </a>
+                        )}
+
+                        {pData.socials.discord && (
+                          <a
+                            href={pData.socials.discord.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center pl-2 pr-2.5 py-1 rounded-full text-[10px] font-medium text-white bg-[#5865F2] hover:opacity-80 transition-opacity"
+                          >
+                            <FontAwesomeIcon
+                              icon={faDiscord}
+                              className="mr-1.5"
+                            />
+                            {pData.socials.discord.username}
+                          </a>
+                        )}
+
+                        {pData.socials.line && (
+                          <a
+                            href={pData.socials.line.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center pl-2 pr-2.5 py-1 rounded-full text-[10px] font-medium text-white bg-[#00C300] hover:opacity-80 transition-opacity"
+                          >
+                            <FontAwesomeIcon icon={faLine} className="mr-1.5" />
+                            {pData.socials.line.username}
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              ))
+            )}
           </AnimatePresence>
         </motion.div>
       </div>
