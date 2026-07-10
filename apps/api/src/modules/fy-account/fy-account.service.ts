@@ -1,4 +1,4 @@
-import { ForbiddenException, HttpException, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
+import { ForbiddenException, HttpException, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "src/core/prisma/prisma.service";
 import { LinkAccountDto } from "./dto/link-account.dto";
 
@@ -8,7 +8,7 @@ export class FyAccountService {
 
 	private readonly logger = new Logger(FyAccountService.name);
 
-	async linkFirstYearAccount(userEmail: string, linkAccountDto: LinkAccountDto) {
+	async linkAccount(userEmail: string, linkAccountDto: LinkAccountDto) {
 		try {
 			const validateAccount = await this.prisma.client.firstYearUser.findUnique({
 				where: {
@@ -21,22 +21,15 @@ export class FyAccountService {
 				throw new ForbiddenException("Cannot link your kmutt account, please contact dev for help");
 			}
 
-			const findLinked = await this.prisma.client.firstYearUserAndUserJoiner.findMany({
+			const findLinked = await this.prisma.client.firstYearUserAndUserJoiner.deleteMany({
 				where: {
 					fyuser_email: validateAccount.fyuser_email,
 					user_email: validateAccount.fyuser_email,
 				},
 			});
 
-			const upsertLinkAccount = await this.prisma.client.firstYearUserAndUserJoiner.upsert({
-				where: {
-					id: findLinked[0].id,
-				},
-				create: {
-					fyuser_email: validateAccount.fyuser_email,
-					user_email: validateAccount.fyuser_email,
-				},
-				update: {
+			const upsertLinkAccount = await this.prisma.client.firstYearUserAndUserJoiner.create({
+				data: {
 					fyuser_email: validateAccount.fyuser_email,
 					user_email: validateAccount.fyuser_email,
 				},
@@ -58,6 +51,9 @@ export class FyAccountService {
 			const user = await this.prisma.client.user.findUnique({
 				where: {
 					id: userId,
+					joiner_fyuser: {
+						some: {},
+					},
 				},
 				include: {
 					joiner_fyuser: {

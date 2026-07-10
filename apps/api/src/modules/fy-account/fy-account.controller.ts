@@ -10,10 +10,9 @@ export class FyAccountController {
 	constructor(private readonly fyAccountService: FyAccountService) {}
 
 	@Post("/link")
-	@UseGuards(JuniorPermission)
 	@UseGuards(LaunchPeriodGuard)
-	linkFirstYearAccount(@Session() session: UserSession, @Body() linkAccountDto: LinkAccountDto) {
-		return this.fyAccountService.linkFirstYearAccount(session.user.email, linkAccountDto);
+	linkAccount(@Session() session: UserSession, @Body() linkAccountDto: LinkAccountDto) {
+		return this.fyAccountService.linkAccount(session.user.email, linkAccountDto);
 	}
 
 	@Get("/profile")

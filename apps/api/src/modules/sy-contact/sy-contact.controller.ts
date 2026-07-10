@@ -9,21 +9,9 @@ import { ContactUpdateDto } from "./dto/sy-contact-update.dto";
 export class SyContactController {
 	constructor(private readonly syContactService: SyContactService) {}
 
-	@Get("/")
-	@UseGuards(LaunchPeriodGuard)
-	getContact() {
-		return this.syContactService.getContactAll();
-	}
-
-	@Get("info")
-	@UseGuards(SeniorPermission)
-	getContactInfo(@Session() session: UserSession) {
-		return this.syContactService.getContactInfo(session.user.id);
-	}
-
 	@Post("/update")
 	@UseGuards(SeniorPermission)
-	updateContactInfo(@Session() session: UserSession, @Body() contactUpdateDto: ContactUpdateDto) {
-		return this.syContactService.updateContactInfo(session.user.id, contactUpdateDto);
+	updateContact(@Session() session: UserSession, @Body() contactUpdateDto: ContactUpdateDto) {
+		return this.syContactService.updateContact(session.user.id, contactUpdateDto);
 	}
 }

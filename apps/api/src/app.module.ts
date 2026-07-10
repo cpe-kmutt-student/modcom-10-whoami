@@ -14,6 +14,9 @@ import { SyContactModule } from "./modules/sy-contact/sy-contact.module";
 import { FyHintScheduleModule } from "./modules/fy-hint-schedule/fy-hint-schedule.module";
 import { ScheduleModule } from "@nestjs/schedule";
 import { SyAccountModule } from "./modules/sy-account/sy-account.module";
+import { FySyContactModule } from "./modules/fy-sy-contact/fy-sy-contact.module";
+import { SyUpdateModule } from "./modules/sy-update/sy-update.module";
+import { SyJuniorHintModule } from "./modules/sy-junior-hint/sy-junior-hint.module";
 
 @Module({
 	imports: [
@@ -31,6 +34,9 @@ import { SyAccountModule } from "./modules/sy-account/sy-account.module";
 		FyHintScheduleModule,
 		ScheduleModule.forRoot(),
 		SyAccountModule,
+		FySyContactModule,
+		SyUpdateModule,
+		SyJuniorHintModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],
