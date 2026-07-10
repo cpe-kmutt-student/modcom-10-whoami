@@ -4,27 +4,60 @@ import Image from "next/image";
 import ParticlesBackground from "@/components/ParticlesBackground";
 import AnnoyingStickers from "@/components/AnnoyingSticker";
 import { authClient } from "@/lib/auth-client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
+import { useUser } from "@/context/UserContext";
+import { useTranslations } from "next-intl";
 
 export default function Home() {
+  const t = useTranslations();
+
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isClickingLogin, setIsClickingLogin] = useState(false);
+
+  /* PROTECTION */
+  const {
+    user,
+    studentData,
+    isLoading: userPending,
+    isStudentLoading,
+  } = useUser();
+  const hasChecked = useRef(false);
+
+  useEffect(() => {
+    if (userPending || isStudentLoading) return;
+
+    if (hasChecked.current) return;
+    hasChecked.current = true;
+
+    if (user) {
+      if (studentData) {
+        router.replace("/hint");
+      } else {
+        router.replace("/genetic-testing");
+      }
+    }
+  }, [userPending, isStudentLoading, user, studentData, router]);
+  /* PROTECTION */
 
   const login = async () => {
     try {
-      setIsLoading(true);
+      setIsClickingLogin(true);
       await authClient.signIn.social({
         provider: "microsoft",
         callbackURL: `${process.env.NEXT_PUBLIC_SERVER_URL}/hint`,
       });
     } catch (error) {
       console.error("Login failed", error);
-    } finally {
-      setIsLoading(false);
+      // Only stop the spinner if the login actually failed
+      setIsClickingLogin(false);
     }
   };
+
+  const isRedirecting = user !== null;
+  const showSpinner =
+    userPending || isStudentLoading || isClickingLogin || isRedirecting;
 
   return (
     <div className="bg-blue-50 min-h-screen relative overflow-hidden">
@@ -50,14 +83,14 @@ export default function Home() {
           <button
             type="button"
             onClick={login}
-            disabled={isLoading}
+            disabled={showSpinner}
             className={`
               group flex flex-row items-center justify-center px-8 py-4 relative
               bg-cloud rounded-full border-3 border-blue-900 
               shadow-comic transition-all duration-300 ease-out
               
               ${
-                isLoading
+                showSpinner
                   ? "opacity-75 grayscale-[0.2] shadow-none translate-x-[4px] translate-y-[4px] cursor-wait"
                   : `cursor-pointer hover:shadow-comic-hover hover:translate-x-[2px] hover:translate-y-[2px]
                      active:shadow-none active:translate-x-[4px] active:translate-y-[4px]`
@@ -70,20 +103,20 @@ export default function Home() {
               height={0}
               sizes="20vw"
               className={`w-auto h-[45px] transition-transform duration-300 mr-4 ${
-                isLoading ? "" : "group-hover:scale-105 group-hover:-rotate-3"
+                showSpinner ? "" : "group-hover:scale-105 group-hover:-rotate-3"
               }`}
               alt="KMUTT"
             />
 
             <div className="text-lg font-mali font-bold text-blue-900 flex items-center">
-              <span>ดำเนินการต่อด้วยบัญชี KMUTT</span>
+              <span>{t("home.continue_with_kmutt")}</span>
 
               <div
                 className={`
                   flex items-center justify-center overflow-hidden 
                   transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]
                   ${
-                    isLoading
+                    showSpinner
                       ? "max-w-[40px] opacity-100 ml-3 scale-100 translate-y-0"
                       : "max-w-0 opacity-0 ml-0 scale-50 translate-y-4"
                   }
@@ -115,21 +148,21 @@ export default function Home() {
 
           <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[320px] text-center pointer-events-auto">
             <p className="text-xs leading-relaxed font-mali text-blue-900/70 text-center max-w-xs mt-2">
-              การเข้าสู่ระบบหมายถึงคุณยอมรับ{" "}
+              {t("home.login_mean")}{" "}
               <a
                 onClick={() => router.push("/privacy-policy")}
                 className="cursor-pointer text-nowrap font-bold text-blue-900 underline decoration-2 decoration-blue-900/30 hover:decoration-quirky hover:text-blue-600 transition-colors"
               >
-                นโยบายความเป็นส่วนตัว
+                {t("home.privacy_policy")}
               </a>{" "}
-              และ{" "}
+              {t("home.and")}{" "}
               <a
                 onClick={() => router.push("/terms-of-service")}
                 className="cursor-pointer text-nowrap font-bold text-blue-900 underline decoration-2 decoration-blue-900/30 hover:decoration-quirky hover:text-blue-600 transition-colors"
               >
-                ข้อกำหนดการใช้งาน
+                {t("home.terms_of_service")}
               </a>{" "}
-              <span className="text-nowrap">ของเรา</span>
+              <span className="text-nowrap">{t("home.of_us")}</span>
             </p>
           </div>
         </div>

@@ -46,20 +46,30 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
 
   const initialMockData = {
-    session: { id: "mock-session", expiresAt: new Date() },
+    session: {
+      id: "mock-session",
+      expiresAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      userId: "mock",
+      token: "ok",
+    },
     user: {
       id: "mock",
       name: "Joe Don",
       email: "student@kmutt.ac.th",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      emailVerified: false,
     },
     studentData: {
       studentID: "69070501000",
-      name: "นายห่านนอย ลอยคอ",
-      program: "Reg",
+      name: "ห่านนอย ลอยคอ",
+      program: "reg",
       hints: {
         1: { hint: "/test-hint.png", isOpen: true },
         2: { hint: "/to1045.png", isOpen: true },
-        3: { hint: "/IMG_20260702_202700_208.jpg", isOpen: false },
+        3: { hint: "/IMG_20260702_202700_208.jpg", isOpen: true },
       },
     },
   } satisfies {

@@ -12,6 +12,7 @@ import { faGift } from '@fortawesome/free-solid-svg-icons';
 import ParticlesBackground from "@/components/ParticlesBackground";
 import { Mesh, MeshStandardMaterial } from "three";
 import { GLTF } from "three-stdlib";
+import { useTranslations } from "next-intl";
 
 type GLTFResult = GLTF & {
   nodes: Record<string, Mesh>;
@@ -227,6 +228,8 @@ interface ParcelSceneProps {
 }
 
 export default function ParcelScene({ hintImage, onAnimationComplete }: ParcelSceneProps) {
+  const t = useTranslations();
+
   const [isReadyToOpen, setIsReadyToOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
 
@@ -450,7 +453,7 @@ export default function ParcelScene({ hintImage, onAnimationComplete }: ParcelSc
             onClick={handleOpenClick}
           >
             <FontAwesomeIcon icon={faGift} className="mr-3 text-2xl" />
-            เปิดกล่องเลย!
+            {t("hint.open_box")}
           </Button>
         </div>
       </div>

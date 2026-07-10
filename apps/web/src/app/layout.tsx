@@ -5,6 +5,9 @@ import CookieModal from "@/components/CookieModal";
 import MusicPlayer from "@/components/MusicPlayer";
 import { ExperienceProvider } from "@/context/ExperienceContext";
 import { UserProvider } from "@/context/UserContext";
+import { NextIntlClientProvider } from "next-intl";
+import LocaleSwitcher from "@/components/LocaleSwitcher";
+import UtilityCluster from "@/components/UtilityCluster";
 
 const mali = Mali({
   subsets: ["latin", "thai"],
@@ -40,12 +43,14 @@ export default function RootLayout({
       className={`${mali.variable} ${prompt.variable} ${jetbrainsMono.variable} w-full h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ExperienceProvider>
-          <UserProvider>{children}</UserProvider>
+        <NextIntlClientProvider>
+          <ExperienceProvider>
+            <UserProvider>{children}</UserProvider>
 
-          <MusicPlayer />
-          <CookieModal />
-        </ExperienceProvider>
+            <UtilityCluster />
+            <CookieModal />
+          </ExperienceProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
