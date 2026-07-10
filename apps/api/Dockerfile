@@ -24,6 +24,9 @@ FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
+
+RUN npm install -g dotenv-cli 
+
 # For run entrypoint
 RUN corepack enable
 
@@ -34,4 +37,4 @@ COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/apps/api ./apps/api
 
 ENTRYPOINT ["/app/apps/api/entrypoint.sh"]
-CMD ["node", "apps/api/dist/main"]
+CMD ["dotenv", "-e", ".env", "--", "node", "apps/api/dist/main"]
