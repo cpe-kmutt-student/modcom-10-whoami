@@ -21,6 +21,7 @@ export default function Home() {
 
   const login = async () => {
     try {
+      console.log(process.env.NEXT_PUBLIC_SERVER_URL);
       setIsClickingLogin(true);
       await authClient.signIn.social({
         provider: "microsoft",
