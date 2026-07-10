@@ -6,8 +6,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCookieBite } from "@fortawesome/free-solid-svg-icons";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export default function CookieModal() {
+  const t = useTranslations();
+
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
 
@@ -44,8 +47,7 @@ export default function CookieModal() {
 
             <div className="flex-1 text-center md:text-left px-2">
               <p className="text-sm md:text-base font-sans text-blue-900 font-medium leading-tight">
-                เราใช้คุกกี้เพื่อพัฒนาประสิทธิภาพ
-                และประสบการณ์ที่ดีในการใช้เว็บไซต์ของคุณ
+                {t("cookie_modal.use_for")}
               </p>
             </div>
 
@@ -57,6 +59,7 @@ export default function CookieModal() {
                 size="default"
               >
                 Privacy Policy
+                {t("cookie_modal.privacy_policy")}
               </Button>
 
               <Button
@@ -65,7 +68,7 @@ export default function CookieModal() {
                 variant="quirky-tiny"
                 size="default"
               >
-                Accept
+                {t("cookie_modal.accept")}
               </Button>
             </div>
           </motion.div>

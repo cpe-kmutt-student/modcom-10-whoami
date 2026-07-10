@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { Mali, Prompt, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import CookieModal from "@/components/CookieModal";
-import MusicPlayer from "@/components/MusicPlayer";
 import { ExperienceProvider } from "@/context/ExperienceContext";
 import { UserProvider } from "@/context/UserContext";
+import { NextIntlClientProvider } from "next-intl";
+import UtilityCluster from "@/components/UtilityCluster";
 
 const mali = Mali({
   subsets: ["latin", "thai"],
@@ -25,8 +26,19 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "???",
-	description: "????????????",
+  title: "???",
+  description: "????????????",
+
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true,
+    },
+  },
 };
 
 export default function RootLayout({
@@ -40,12 +52,14 @@ export default function RootLayout({
       className={`${mali.variable} ${prompt.variable} ${jetbrainsMono.variable} w-full h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ExperienceProvider>
-          <UserProvider>{children}</UserProvider>
+        <NextIntlClientProvider>
+          <ExperienceProvider>
+            <UserProvider>{children}</UserProvider>
 
-          <MusicPlayer />
-          <CookieModal />
-        </ExperienceProvider>
+            <UtilityCluster />
+            <CookieModal />
+          </ExperienceProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

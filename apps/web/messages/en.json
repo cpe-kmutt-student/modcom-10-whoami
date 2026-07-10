@@ -1,0 +1,63 @@
+{
+  "home": {
+    "continue_with_kmutt": "Continue with KMUTT Account",
+    "login_mean": "By logging in, you agree to our",
+    "privacy_policy": "Privacy Policy",
+    "and": "and",
+    "terms_of_service": "Terms of Service",
+    "of_us": ""
+  },
+  "genetic_testing": {
+    "hello": "Hello,",
+    "name": "{fullname}",
+    "is_your_name": "Is this your name?",
+    "confirm": "Confirm, this is my name",
+    "deny": "No, this is not my name !!!",
+    "student_id": "Student ID",
+    "input_student_id": "Enter your 11-digit Student ID",
+    "verify": "Let's go together",
+    "access_denied": "Oh no",
+    "recheck": "Please check your Student ID again.",
+    "it_correct": "If it is correct, please contact the mentors.",
+    "back": "Back"
+  },
+  "hint": {
+    "mentor_name_list": "Mentor List",
+    "open_box": "Open the box!",
+    "no_hint": "Still no hint. Did your mentor forget?"
+  },
+  "list": {
+    "mentor_name_list": "Mentor List",
+    "loading": "Loading mentor list...",
+    "notfound": "No mentors found in the selected category."
+  },
+  "not_found": {
+    "oops": "Oops!!",
+    "text": "What are you looking for?",
+    "home": "Back to Home"
+  },
+  "cookie_modal": {
+    "use_for": "We use cookies to improve performance and provide a good experience for you on our website.",
+    "privacy_policy": "Privacy Policy",
+    "accept": "Accept"
+  },
+  "loading": {
+    "text": "On the way"
+  },
+  "program": {
+    "full": {
+      "reg": "Regular",
+      "inter": "International",
+      "hds": "Health Data Science"
+    },
+    "short": {
+      "reg": "Reg",
+      "inter": "Inter",
+      "hds": "HDS"
+    }
+  },
+  "user_profile": {
+    "name": "{fullname}",
+    "logout": "Log Out"
+  }
+}

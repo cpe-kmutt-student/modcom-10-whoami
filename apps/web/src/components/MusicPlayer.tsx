@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMusic,
@@ -141,7 +141,7 @@ export default function MusicPlayer() {
 
   return (
     <div
-      className="fixed bottom-4 right-4 z-[100] flex items-center justify-end"
+      className=" z-[100] flex items-center justify-end"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -150,6 +150,8 @@ export default function MusicPlayer() {
         ref={audioRef}
         src={currentTrack.src}
         onEnded={() => triggerTrackChange("next")}
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
       />
 
 

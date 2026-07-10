@@ -6,6 +6,7 @@ import {
   StateMachineCustomEvent,
 } from "@lottiefiles/dotlottie-react";
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 const LOADING_PHRASES = ["", ".", "..", "..."];
 
@@ -15,6 +16,8 @@ interface LoadingProps {
 }
 
 export default function Loading({ isExiting = false, onExited }: LoadingProps) {
+  const t = useTranslations();
+
   const [dotLottieInstance, setDotLottieInstance] = useState<DotLottie | null>(
     null,
   );
@@ -93,7 +96,7 @@ export default function Loading({ isExiting = false, onExited }: LoadingProps) {
         />
 
         <div className={`text-xl font-mali font-bold text-blue-900 text-center px-4 transition-opacity duration-500 ease-in-out ${mounted && !isExiting ? "opacity-100" : "opacity-0"}`}>
-          กำลังเดินทาง{phrase}
+          {t("loading.text")}{phrase}
         </div>
 
         <footer className="absolute bottom-3 left-4 text-xs text-blue-900/40 font-mali">
