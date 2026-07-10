@@ -7,7 +7,7 @@ import { admin, openAPI, username } from "better-auth/plugins";
 export const auth = betterAuth({
 	secret: config.backend.betterAuth.secret,
 	baseURL: config.backend.betterAuth.baseUrl,
-	basePath: config.nodeEnv === "production" ? "/auth" : "/auth",
+	basePath: "/api/auth",
 	trustedOrigins: config.backend.allowOrigins,
 	database: prismaAdapter(prisma, {
 		provider: "postgresql",
