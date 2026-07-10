@@ -15,6 +15,8 @@ import { Variants } from "motion";
 import { useLoading } from "@/context/ExperienceContext";
 import { useTranslations } from "next-intl";
 
+import { useStudentGuard } from "@/hooks/useRouteGuard";
+
 const VALID_HINTS = ['1', '2', '3'];
 
 const backgroundVarient: Variants = {
@@ -95,6 +97,7 @@ function HintFlipCard({ hintImage, isFlipped }: { hintImage: string, isFlipped: 
 
 export default function Hint() {
   const t = useTranslations();
+  const { isChecking } = useStudentGuard();
 
   const params = useParams();
   const rawId = params?.id?.[0] || null;
@@ -105,60 +108,11 @@ export default function Hint() {
   );
   const [isFlipped, setIsFlipped] = useState(false);
 
-  /* PROTECTION */
   const router = useRouter();
-  const { user, studentData, isLoading, isStudentLoading, markHintAsOpened } =
+  const { studentData, markHintAsOpened } =
     useUser();
 
-  const { showLoading, hideLoading } = useLoading();
-
-  const hasChecked = useRef(false);
-
-  useEffect(() => {
-    const isFetching = isLoading || isStudentLoading;
-
-    if (isFetching) {
-      showLoading();
-      return;
-    }
-
-    hideLoading();
-
-    if (hasChecked.current) return;
-
-    hasChecked.current = true;
-
-    if (!user) {
-      router.replace("/");
-    } else if (!studentData) {
-      router.replace("/genetic-testing");
-    }
-  }, [
-    isLoading,
-    isStudentLoading,
-    user,
-    studentData,
-    router,
-    showLoading,
-    hideLoading,
-  ]);
-
-  if (isLoading || isStudentLoading || !user || !studentData) return null;
-  /* PROTECTION */
-
   const hints = studentData?.hints;
-
-  const unopenedHintEntry = Object.entries(hints || {}).find(
-    ([id, hint]) => hint !== null && hint.isOpen === false,
-  );
-  const unopenedHintId = unopenedHintEntry ? unopenedHintEntry[0] : null;
-  const unopenedHint = unopenedHintEntry ? unopenedHintEntry[1] : null;
-
-  const availableHints = Object.entries(hints || {})
-    .filter(([id, hint]) => hint !== null)
-    .map(([id, hint]) => ({ id, hint: hint! }));
-
-  const activeHintObj = availableHints.find((h) => h.id === activeHintId);
 
   useEffect(() => {
     if (rawId && hints) {
@@ -167,6 +121,7 @@ export default function Hint() {
 
       if (!isValidAndOpened) {
         window.history.replaceState(null, "", "/hint");
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setActiveHintId(null);
       }
     }
@@ -193,6 +148,20 @@ export default function Hint() {
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
+
+  if (isChecking) return null;
+
+  const unopenedHintEntry = Object.entries(hints || {}).find(
+    ([id, hint]) => hint !== null && hint.isOpen === false,
+  );
+  const unopenedHintId = unopenedHintEntry ? unopenedHintEntry[0] : null;
+  const unopenedHint = unopenedHintEntry ? unopenedHintEntry[1] : null;
+
+  const availableHints = Object.entries(hints || {})
+    .filter(([id, hint]) => hint !== null)
+    .map(([id, hint]) => ({ id, hint: hint! }));
+
+  const activeHintObj = availableHints.find((h) => h.id === activeHintId);
 
   const openHint = (id: string) => {
     const hintObj = hints?.[id as unknown as 1 | 2 | 3];
@@ -250,37 +219,45 @@ export default function Hint() {
 
           <div className="flex-1 flex flex-col items-center justify-center pointer-events-none z-10 py-24 pb-32">
             <div className="w-full max-w-6xl px-10 mx-auto flex flex-wrap justify-center gap-10 md:gap-20">
-              {availableHints.map(({ id, hint }) => (
-                <div
-                  key={id}
-                  className="relative flex flex-col justify-center items-center pointer-events-auto flex-none w-full md:w-[calc(33.333%-53.33px)] max-w-[360px]"
-                >
-                  <div className="absolute bg-blue-950 w-[80%] aspect-square rounded-full -z-10"></div>
-
-                  {activeHintId !== id && !showBox && (
-                    <motion.div
-                      layoutId={`hint-card-${id}`}
-                      onClick={() => openHint(id)}
-                      className="w-full cursor-pointer"
-                      whileHover={{ scale: 1.05 }}
-                      style={{
-                        aspectRatio: "683 / 412",
-                        transformStyle: "preserve-3d",
-                      }}
-                    >
-                      <div
-                        className="w-full h-full bg-white p-2 border-[2px] border-blue-900 flex flex-col items-center justify-center rounded-md shadow-lg"
-                        style={{
-                          backgroundImage: `url("${hint.hint}")`,
-                          backgroundSize: "cover",
-                          backgroundPosition: "center",
-                          backgroundRepeat: "no-repeat",
-                        }}
-                      />
-                    </motion.div>
-                  )}
+              {!availableHints || availableHints.length === 0 ? (
+                <div className="w-full text-center py-10 pointer-events-auto">
+                  <p className="text-xl text-gray-500 font-medium">
+                    {t("hint.no_hint")}
+                  </p>
                 </div>
-              ))}
+              ) : (
+                availableHints.map(({ id, hint }) => (
+                  <div
+                    key={id}
+                    className="relative flex flex-col justify-center items-center pointer-events-auto flex-none w-full md:w-[calc(33.333%-53.33px)] max-w-[360px]"
+                  >
+                    <div className="absolute bg-blue-950 w-[80%] aspect-square rounded-full -z-10"></div>
+
+                    {activeHintId !== id && !showBox && (
+                      <motion.div
+                        layoutId={`hint-card-${id}`}
+                        onClick={() => openHint(id)}
+                        className="w-full cursor-pointer"
+                        whileHover={{ scale: 1.05 }}
+                        style={{
+                          aspectRatio: "683 / 412",
+                          transformStyle: "preserve-3d",
+                        }}
+                      >
+                        <div
+                          className="w-full h-full bg-white p-2 border-[2px] border-blue-900 flex flex-col items-center justify-center rounded-md shadow-lg"
+                          style={{
+                            backgroundImage: `url("${hint.hint}")`,
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                            backgroundRepeat: "no-repeat",
+                          }}
+                        />
+                      </motion.div>
+                    )}
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -303,7 +280,8 @@ export default function Hint() {
               }}
             >
               <FontAwesomeIcon icon={faPeopleGroup} className="md:mr-2" />
-              <span className="hidden md:flex">{t("hint.mentor_name_list")}
+              <span className="hidden md:flex">
+                {t("hint.mentor_name_list")}
               </span>
             </Button>
           </motion.div>

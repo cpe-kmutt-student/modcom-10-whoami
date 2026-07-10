@@ -1,13 +1,13 @@
+import { config } from "@repo/config";
+import { prisma } from "@repo/database";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { admin, openAPI, username } from "better-auth/plugins";
-import { config } from "@repo/config";
-import { prisma } from "@repo/database";
 
 export const auth = betterAuth({
 	secret: config.backend.betterAuth.secret,
 	baseURL: config.backend.betterAuth.baseUrl,
-	basePath: "/api/auth",
+	basePath: config.nodeEnv === "production" ? "/auth" : "/api/auth",
 	trustedOrigins: config.backend.allowOrigins,
 	database: prismaAdapter(prisma, {
 		provider: "postgresql",

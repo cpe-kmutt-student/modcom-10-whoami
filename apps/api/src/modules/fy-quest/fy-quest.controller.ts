@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Req, UseGuards } from "@nestjs/common";
+import { Controller, Get, Param, Post, Req, UseGuards } from "@nestjs/common";
 import { Session, type UserSession } from "@thallesp/nestjs-better-auth";
 import { FyQuestService } from "./fy-quest.service";
 import { QuestAllow, QuestPeriodGuard } from "src/common/guards/quest-period.guard";
@@ -21,5 +21,12 @@ export class FyQuestController {
 	@UseGuards(QuestPeriodGuard)
 	getQuestById(@Session() session: UserSession, @Req() req: Request & { questAllow: QuestAllow }, @Param("id") questId: string) {
 		return this.fyQuestService.getQuestById(session.user.id, req, questId);
+	}
+
+	@Post("/opened/:hintIndex")
+	@UseGuards(JuniorPermission)
+	@UseGuards(QuestPeriodGuard)
+	setOpenedBox(@Session() session: UserSession, @Param("hintIndex") hintIndex: string) {
+		return this.fyQuestService.setOpenedBox(session.user.id, hintIndex);
 	}
 }

@@ -150,6 +150,8 @@ export default function MusicPlayer() {
         ref={audioRef}
         src={currentTrack.src}
         onEnded={() => triggerTrackChange("next")}
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
       />
 
 

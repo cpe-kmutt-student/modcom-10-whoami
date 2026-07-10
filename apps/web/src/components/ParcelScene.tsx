@@ -13,6 +13,7 @@ import ParticlesBackground from "@/components/ParticlesBackground";
 import { Mesh, MeshStandardMaterial } from "three";
 import { GLTF } from "three-stdlib";
 import { useTranslations } from "next-intl";
+import { useUser } from "@/context/UserContext";
 
 type GLTFResult = GLTF & {
   nodes: Record<string, Mesh>;
@@ -227,7 +228,11 @@ interface ParcelSceneProps {
   onAnimationComplete: () => void;
 }
 
-export default function ParcelScene({ hintImage, onAnimationComplete }: ParcelSceneProps) {
+export default function ParcelScene({
+  hintImage,
+  onAnimationComplete,
+  hintId,
+}: ParcelSceneProps) {
   const t = useTranslations();
 
   const [isReadyToOpen, setIsReadyToOpen] = useState(false);
@@ -245,11 +250,9 @@ export default function ParcelScene({ hintImage, onAnimationComplete }: ParcelSc
 
   // eslint-disable-next-line react-hooks/refs
   const handleOpenClick = contextSafe(() => {
-
     const paper = paperRef.current;
     const canvasContainer = canvasContainerRef.current;
     const background = backgroundRef.current;
-
 
     if (!paper || !canvasContainer) return;
 
@@ -258,9 +261,7 @@ export default function ParcelScene({ hintImage, onAnimationComplete }: ParcelSc
 
     const tl = gsap.timeline();
 
-
     tl.to({}, { duration: 0.8 });
-
 
     tl.fromTo(
       paper,
@@ -280,7 +281,6 @@ export default function ParcelScene({ hintImage, onAnimationComplete }: ParcelSc
       },
     );
 
-
     tl.to(
       canvasContainer,
       {
@@ -290,7 +290,6 @@ export default function ParcelScene({ hintImage, onAnimationComplete }: ParcelSc
       },
       "+=0.5",
     );
-
 
     tl.to(
       paper,
@@ -324,7 +323,6 @@ export default function ParcelScene({ hintImage, onAnimationComplete }: ParcelSc
 
   return (
     <div className="w-full h-screen overflow-hidden relative selection:bg-quirky selection:text-blue-900 perspective-[1000px]">
-
       <div ref={canvasContainerRef} className="absolute inset-0 w-full h-full">
         <Canvas
           orthographic
@@ -357,12 +355,10 @@ export default function ParcelScene({ hintImage, onAnimationComplete }: ParcelSc
         </Canvas>
       </div>
 
-
       <div
         className="absolute inset-2 flex items-center justify-center pointer-events-none z-30"
         style={{ perspective: "1000px" }}
       >
-
         <div
           ref={paperRef}
           className="w-full hidden max-w-50 pointer-events-auto relative cursor-pointer"
@@ -397,7 +393,6 @@ export default function ParcelScene({ hintImage, onAnimationComplete }: ParcelSc
               }}
             >
               <div className={`w-full h-full ${isFlipped ? "" : "hover-3d"}`}>
-
                 <div
                   className="w-full h-full bg-white p-4 md:p-6 border-2 border-blue-900 flex flex-col items-center justify-center relative rounded-md shadow-lg"
                   style={{
@@ -410,7 +405,6 @@ export default function ParcelScene({ hintImage, onAnimationComplete }: ParcelSc
                   <div className="text-center font-mali pointer-events-none select-none"></div>
                 </div>
 
-
                 <div className="w-full h-full"></div>
                 <div className="w-full h-full"></div>
                 <div className="w-full h-full"></div>
@@ -421,7 +415,6 @@ export default function ParcelScene({ hintImage, onAnimationComplete }: ParcelSc
                 <div className="w-full h-full"></div>
               </div>
             </div>
-
 
             <div
               className="absolute inset-0 w-full h-full bg-blue-900 p-4 md:p-6 border-2 border-blue-900 flex flex-col items-center justify-center rounded-md shadow-lg"
@@ -440,7 +433,6 @@ export default function ParcelScene({ hintImage, onAnimationComplete }: ParcelSc
           </div>
         </div>
       </div>
-
 
       <div className="absolute inset-0 flex items-end justify-center pb-24 pointer-events-none z-20">
         <div

@@ -1,4 +1,6 @@
 import { ForbiddenException, HttpException, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
+import { config } from "@repo/config";
+import { getPreSignUrl } from "@repo/storage";
 import { Request } from "express";
 import { QuestAllow } from "src/common/guards/quest-period.guard";
 import { PrismaService } from "src/core/prisma/prisma.service";
@@ -36,11 +38,20 @@ export class FyQuestService {
 			}
 
 			const filterQuest = getUser.joiner_fyuser[0].fyuser.fyquest
-				.filter((q) => (!req.questAllow.quest1 ? q.fyquest_id !== 1 : true))
-				.filter((q) => (!req.questAllow.quest2 ? q.fyquest_id !== 2 : true))
-				.filter((q) => (!req.questAllow.quest3 ? q.fyquest_id !== 3 : true));
+				.filter((q) => (!req.questAllow.quest1 ? q.fyquest_index !== 1 : true))
+				.filter((q) => (!req.questAllow.quest2 ? q.fyquest_index !== 2 : true))
+				.filter((q) => (!req.questAllow.quest3 ? q.fyquest_index !== 3 : true));
 
-			return filterQuest;
+			const mapQuestImageUrl = await Promise.all(
+				filterQuest.map(async (q) => {
+					return {
+						...q,
+						fyquest_url: q.fyquest_detail ? await getPreSignUrl(config.backend.s3.bucket, q.fyquest_detail) : null,
+					};
+				}),
+			);
+
+			return mapQuestImageUrl;
 		} catch (e) {
 			this.logger.error(e);
 			if (e instanceof HttpException) {
@@ -78,17 +89,69 @@ export class FyQuestService {
 			}
 
 			const filterQuest = getUser.joiner_fyuser[0].fyuser.fyquest
-				.filter((q) => (!req.questAllow.quest1 ? q.fyquest_id !== 1 : true))
-				.filter((q) => (!req.questAllow.quest2 ? q.fyquest_id !== 2 : true))
-				.filter((q) => (!req.questAllow.quest3 ? q.fyquest_id !== 3 : true));
+				.filter((q) => (!req.questAllow.quest1 ? q.fyquest_index !== 1 : true))
+				.filter((q) => (!req.questAllow.quest2 ? q.fyquest_index !== 2 : true))
+				.filter((q) => (!req.questAllow.quest3 ? q.fyquest_index !== 3 : true));
 
-			const filterById = filterQuest.find((q) => String(q.fyquest_id) === questId);
+			const filterById = filterQuest.find((q) => String(q.fyquest_index) === questId);
 
 			if (!filterById) {
 				throw new NotFoundException();
 			}
 
 			return filterById;
+		} catch (e) {
+			this.logger.error(e);
+			if (e instanceof HttpException) {
+				throw e;
+			}
+
+			throw new InternalServerErrorException(e);
+		}
+	}
+
+	async setOpenedBox(userId: string, hintIndex: string) {
+		try {
+			const getFyQuest = await this.prisma.client.user.findUnique({
+				where: {
+					id: userId,
+					joiner_fyuser: {
+						some: {
+							fyuser: {
+								fyquest: {
+									some: {
+										fyquest_index: parseInt(hintIndex),
+									},
+								},
+							},
+						},
+					},
+				},
+				include: {
+					joiner_fyuser: {
+						include: {
+							fyuser: {
+								include: {
+									fyquest: true,
+								},
+							},
+						},
+					},
+				},
+			});
+
+			if (!getFyQuest) throw new ForbiddenException();
+
+			const updateStatus = await this.prisma.client.firstYearQuest.update({
+				where: {
+					fyquest_id: getFyQuest.joiner_fyuser[0].fyuser.fyquest[0].fyquest_id,
+				},
+				data: {
+					fyquest_status_boxopen: true,
+				},
+			});
+
+			return updateStatus;
 		} catch (e) {
 			this.logger.error(e);
 			if (e instanceof HttpException) {

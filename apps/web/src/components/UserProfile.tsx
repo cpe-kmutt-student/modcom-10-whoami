@@ -93,7 +93,7 @@ export default function UserProfile() {
                   {studentData?.name}
                 </span>
                 <span className="text-xs font-sans font-bold text-blue-500">
-                  {t("program.full." + studentData?.program)}
+                  {t("program.full." + (studentData?.program ?? "reg"))}
                 </span>
               </div>
 

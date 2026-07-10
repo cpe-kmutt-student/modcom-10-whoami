@@ -1,14 +1,14 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import {
   createContext,
-  useContext,
   type ReactNode,
-  useState,
+  useContext,
   useEffect,
+  useState,
 } from "react";
-import { authClient, Session } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
+import { authClient, type Session } from "@/lib/auth-client";
 
 export interface HintItem {
   hint: string;
@@ -35,41 +35,111 @@ interface UserContextType {
   signOut: () => Promise<void>;
   studentData: StudentData | null;
   markHintAsOpened: (hintId: string) => Promise<void>;
+  refreshStudentData: () => void;
 }
 
-const isMockMode = (process.env.NEXT_PUBLIC_USE_MOCK === "true");
+const isMockMode = process.env.NEXT_PUBLIC_USE_MOCK === "true";
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
+
+type FyAccountProfileResponse = {
+  joiner_fyuser?: Array<{
+    fyuser?: {
+      fyuser_id?: string;
+      fyuser_firstname?: string;
+      fyuser_lastname?: string;
+    };
+  }>;
+};
+
+type FyQuestResponse = Array<{
+  fyquest_index: number;
+  fyquest_status_boxopen: boolean;
+  fyquest_url: string | null;
+}>;
+
+const emptyHints = (): StudentData["hints"] => ({
+  1: null,
+  2: null,
+  3: null,
+});
+
+const mapProfileAndQuestsToStudentData = (
+  profile: FyAccountProfileResponse,
+  quests: FyQuestResponse,
+): StudentData | null => {
+  const fyuser = profile.joiner_fyuser?.[0]?.fyuser;
+
+  if (!fyuser?.fyuser_id) {
+    return null;
+  }
+
+  const hints = emptyHints();
+
+  quests.forEach((quest) => {
+    if (
+      quest.fyquest_index === 1 ||
+      quest.fyquest_index === 2 ||
+      quest.fyquest_index === 3
+    ) {
+      hints[quest.fyquest_index] = {
+        hint: quest.fyquest_url ?? "",
+        isOpen: quest.fyquest_status_boxopen,
+      };
+    }
+  });
+
+  const fullName = [fyuser.fyuser_firstname, fyuser.fyuser_lastname]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+
+  return {
+    studentID: fyuser.fyuser_id,
+    name: fullName || fyuser.fyuser_id,
+    program:
+      fyuser.fyuser_id.slice(7, 9) === "10"
+        ? "reg"
+        : fyuser.fyuser_id.slice(7, 9) === "34"
+          ? "inter"
+          : fyuser.fyuser_id.slice(7, 9) === "52"
+            ? "hds"
+            : "",
+    hints,
+  };
+};
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const { data, isPending, error } = authClient.useSession();
   const router = useRouter();
+  const [studentDataRefreshKey, setStudentDataRefreshKey] = useState(0);
 
   const initialMockData = {
     session: {
       id: "mock-session",
-      expiresAt: new Date(),
       createdAt: new Date(),
       updatedAt: new Date(),
       userId: "mock",
-      token: "ok",
+      expiresAt: new Date(),
+      token: "mock-token",
     },
     user: {
       id: "mock",
-      name: "Joe Don",
-      email: "student@kmutt.ac.th",
       createdAt: new Date(),
       updatedAt: new Date(),
+      name: "Joe Don",
+      email: "student@kmutt.ac.th",
       emailVerified: false,
+      image: null,
     },
     studentData: {
       studentID: "69070501000",
-      name: "ห่านนอย ลอยคอ",
-      program: "reg",
+      name: "นายห่านนอย ลอยคอ",
+      program: "Reg",
       hints: {
         1: { hint: "/test-hint.png", isOpen: true },
         2: { hint: "/to1045.png", isOpen: true },
-        3: { hint: "/IMG_20260702_202700_208.jpg", isOpen: true },
+        3: { hint: "/IMG_20260702_202700_208.jpg", isOpen: false },
       },
     },
   } satisfies {
@@ -81,7 +151,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [studentData, setStudentData] = useState<StudentData | null>(() =>
     isMockMode ? initialMockData.studentData : null,
   );
-  const [isStudentLoading, setIsStudentLoading] = useState<boolean>(false);
+  const [isStudentLoading, setIsStudentLoading] = useState<boolean>(!isMockMode);
 
   const [mockData, setMockData] = useState<{
     session: Session["session"];
@@ -94,13 +164,42 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (isMockMode) return;
 
-    if (data?.user) {
+    if (isPending) {
+      setIsStudentLoading(true);
+      return;
+    }
+
+    if (data?.user?.id) {
       const fetchStudentData = async () => {
         setIsStudentLoading(true);
+
         try {
-          const response = await fetch(`/api/students/${data.user.id}`);
-          const resData: StudentData = await response.json();
-          setStudentData(resData);
+          const [profileResponse, questResponse] = await Promise.all([
+            fetch(
+              `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/_/fy/account/profile`,
+              { credentials: "include" },
+            ),
+            fetch(
+              `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/_/fy/quest/`,
+              { credentials: "include" },
+            ),
+          ]);
+
+          if (!profileResponse.ok || !questResponse.ok) {
+            router.push("/genetic-testing");
+            throw new Error("Failed to fetch student data from backend");
+          }
+
+          const [profileData, questData] = await Promise.all([
+            profileResponse.json() as Promise<FyAccountProfileResponse>,
+            questResponse.json() as Promise<FyQuestResponse>,
+          ]);
+
+          const mappedStudentData = mapProfileAndQuestsToStudentData(
+            profileData,
+            questData,
+          );
+          setStudentData(mappedStudentData);
         } catch (err) {
           console.error("Failed to fetch student data:", err);
         } finally {
@@ -109,26 +208,38 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       };
 
       fetchStudentData();
+    } else {
+      setStudentData(null);
+
+      setIsStudentLoading(false);
     }
-  }, [data?.user, isPending]);
+  }, [data?.user?.id, isPending, studentDataRefreshKey]);
+
+  const refreshStudentData = () => {
+    if (isMockMode) {
+      setStudentData(initialMockData.studentData);
+      return;
+    }
+
+    setStudentDataRefreshKey((currentKey) => currentKey + 1);
+  };
 
   const handleSignOut = async () => {
     if (isMockMode) {
       setMockData(null);
       setStudentData(null);
-      router.refresh();
+      router.push("/");
       return;
     }
 
     try {
       await authClient.signOut();
       setStudentData(null);
-      router.refresh();
+      router.push("/");
     } catch (err) {
       console.error("Sign out failed", err);
     }
   };
-
 
   const markHintAsOpened = async (hintId: string) => {
     const validIds = ["1", "2", "3"];
@@ -138,7 +249,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const currentHint = studentData.hints[id];
 
     if (!currentHint || currentHint.isOpen) return;
-
 
     const updatedStudentData = {
       ...studentData,
@@ -157,19 +267,19 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-
-    try {
-
-      await fetch(`/api/students/${data?.user?.id}/hints`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ hintId: id, isOpen: true }),
-      });
-    } catch (err) {
-      console.error("Failed to update hint status:", err);
-
-    }
-  };
+		try {
+			await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/_/fy/quest/opened/${id}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include"
+        },
+      );
+		} catch (err) {
+			console.error("Failed to update hint status:", err);
+		}
+	};
 
   const value = isMockMode
     ? {
@@ -181,6 +291,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         signOut: handleSignOut,
         studentData: studentData,
         markHintAsOpened,
+        refreshStudentData,
       }
     : {
         session: data?.session || null,
@@ -191,10 +302,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         signOut: handleSignOut,
         studentData: studentData,
         markHintAsOpened,
+        refreshStudentData,
       };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
-};
+};;
 
 export const useUser = () => {
   const context = useContext(UserContext);

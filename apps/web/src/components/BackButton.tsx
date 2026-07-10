@@ -4,15 +4,22 @@ import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import type { VariantProps } from "class-variance-authority";
 
 interface BackButtonProps {
   path?: string;
   onClick?: () => void;
   className?: string;
+  variant?: VariantProps<typeof buttonVariants>["variant"];
 }
 
-export default function BackButton({ path, onClick, className }: BackButtonProps) {
+export default function BackButton({
+  path,
+  onClick,
+  className,
+  variant = "default-tiny",
+}: BackButtonProps) {
   const router = useRouter();
 
   const handleBackBTN = () => {
@@ -32,7 +39,7 @@ export default function BackButton({ path, onClick, className }: BackButtonProps
       transition={{ type: "spring", bounce: 0.6, duration: 0.8 }}
       className={`fixed top-4 left-4 z-[100] ${className || ""}`}
     >
-      <Button size="circle" variant="default-tiny" onClick={handleBackBTN}>
+      <Button size="circle" variant={variant} onClick={handleBackBTN}>
         <FontAwesomeIcon icon={faArrowLeft} className="text-lg md:text-2xl" />
       </Button>
     </motion.div>

@@ -20,6 +20,8 @@ import { Variants } from "motion";
 import { useUser } from "@/context/UserContext";
 import { useTranslations } from "next-intl";
 
+import { useVerifyGuard } from "@/hooks/useRouteGuard";
+
 const containerVariants:Variants = {
   hidden: { opacity: 0 },
   show: {
@@ -39,50 +41,23 @@ const itemVariants:Variants = {
 };
 
 export default function GeneticTesting() {
+  const { isChecking } = useVerifyGuard();
+
   const t = useTranslations();
 
   const [nowState, setState] = useState<number>(1);
   const [studentId, setStudentId] = useState("");
 
-  /* PROTECTION */
-  const router = useRouter();
-  const { user, studentData, isLoading, isStudentLoading } = useUser();
-  const { showLoading, hideLoading } = useLoading();
-
-  const hasChecked = useRef(false);
-
-  useEffect(() => {
-    const isFetching = isLoading || isStudentLoading;
-
-    if (isFetching) {
-      showLoading();
-      return;
-    }
-
-    hideLoading();
-
-    if (hasChecked.current) return;
-
-    // Perform the one-time check
-    hasChecked.current = true;
-
-    if (!user) {
-      router.replace("/");
-    } else if (studentData) {
-      router.replace("/hint");
-    }
-  }, [
-    isLoading,
-    isStudentLoading,
+  const {
     user,
     studentData,
-    router,
-    showLoading,
-    hideLoading,
-  ]);
-
-  if (isLoading || isStudentLoading || !user || studentData) return null;
-  /* PROTECTION */
+    isLoading,
+    isStudentLoading,
+    signOut,
+    refreshStudentData,
+  } = useUser();
+  const { showLoading, hideLoading } = useLoading();
+  const router = useRouter();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const onlyNums = e.target.value.replace(/[^0-9]/g, "");
@@ -95,20 +70,42 @@ export default function GeneticTesting() {
   const handleVerify = () => {
     showLoading();
 
-    alert(studentId);
-
     setState(3);
 
-    setTimeout(() => {
-      const mockApiSuccess = Math.random() > 0.5;
-      hideLoading();
-      if (mockApiSuccess) {
+    const linkAccount = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/_/fy/account/link`,
+          {
+            method: "POST",
+            credentials: "include",
+            body: JSON.stringify({
+              student_id: studentId,
+            }),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to link account");
+        }
+
+        refreshStudentData();
         router.push("/hint");
-      } else {
+      } catch (error) {
+        console.error("Link account failed:", error);
         setState(4);
+      } finally {
+        hideLoading();
       }
-    }, 10000);
+    };
+
+    void linkAccount();
   };
+
+  if (isChecking) return null;
 
   return (
     <div className="min-h-screen relative overflow-hidden flex flex-col justify-center items-center p-3 bg-blue-50">
@@ -138,7 +135,11 @@ export default function GeneticTesting() {
                         className="text-2xl font-sans text-blue-900"
                       >
                         {t("genetic_testing.name", {
-                          fullname: user?.name ?? "",
+                          fullname:
+                            user?.name
+                              .toLowerCase()
+                              .replace(/\b\w/g, (char) => char.toUpperCase()) ??
+                            "",
                         })}
                       </motion.div>
                     </div>
@@ -157,7 +158,7 @@ export default function GeneticTesting() {
                       </Button>
 
                       <Button
-                        onClick={() => router.push("/")}
+                        onClick={signOut}
                         variant="ghost_danger"
                         className="h-12 w-full border-2 border-oops hover:bg-oops/10"
                       >

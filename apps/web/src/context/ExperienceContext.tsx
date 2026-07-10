@@ -31,9 +31,10 @@ export function ExperienceProvider({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const activeRequests = useRef<number>(0);
 
-  const MIN_LOADING_TIME = 800;
+  const MIN_LOADING_TIME = 1000;
 
   const showLoading = useCallback(() => {
+    console.log("show");
     activeRequests.current += 1;
 
     if (timeoutRef.current) {
@@ -49,6 +50,7 @@ export function ExperienceProvider({
   }, []);
 
   const hideLoading = useCallback(() => {
+    console.log("hide")
     activeRequests.current = Math.max(0, activeRequests.current - 1);
 
     if (activeRequests.current === 0) {
