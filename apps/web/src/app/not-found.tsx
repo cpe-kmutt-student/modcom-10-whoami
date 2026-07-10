@@ -3,8 +3,10 @@
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 export default function NotFound() {
+  const t = useTranslations();
   const router = useRouter();
   return (
     <div className="min-h-screen bg-blue-50 relative overflow-hidden flex flex-col items-center justify-center p-4 selection:bg-quirky selection:text-blue-900">
@@ -188,13 +190,17 @@ export default function NotFound() {
         className="z-10 bg-cloud border-3 border-blue-900 rounded-3xl p-8 max-w-lg w-full text-center shadow-[8px_8px_0px_0px_var(--color-blue-900)] flex flex-col items-center gap-6 relative"
       >
         <div className="absolute -top-4 -right-4 bg-quirky border-3 border-blue-900 text-blue-900 font-bold font-mali px-4 py-1 rounded-full shadow-[2px_2px_0px_0px_var(--color-blue-900)] rotate-12">
-          Oops!
+          {t("not_found.oops")}
         </div>
 
-        <div className="text-xl font-display">กำลังหาอะไรอยู่หรอ ?</div>
+        <div className="text-xl font-display">{t("not_found.text")}</div>
 
-        <Button onClick={() => router.push("./")} variant="quirky" className="w-full">
-          ไปหน้าหลัก
+        <Button
+          onClick={() => router.push("./")}
+          variant="quirky"
+          className="w-full"
+        >
+          {t("not_found.home")}
         </Button>
       </motion.div>
     </div>
