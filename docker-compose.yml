@@ -65,7 +65,7 @@ services:
 
   api:
     <<: *defaults
-    image: ghcr.io/imjustnon/mentor-mentee-api:staging
+    image: ghcr.io/imjustnon/whoami-api:staging
     expose:
       - "3010"
     labels:
@@ -76,7 +76,7 @@ services:
 
   web:
     <<: *defaults
-    image: ghcr.io/imjustnon/mentor-mentee-web:staging
+    image: ghcr.io/imjustnon/whoami-web:staging
     expose:
       - "3000"
     depends_on:
@@ -91,7 +91,7 @@ services:
 
   mentor:
     <<: *defaults
-    image: ghcr.io/imjustnon/mentor-mentee-mentor:staging
+    image: ghcr.io/imjustnon/whoami-mentor:staging
     expose:
       - "3005"
     depends_on:
