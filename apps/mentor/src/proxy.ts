@@ -2,16 +2,17 @@ import { config as appConfig } from "@repo/config";
 import { headers } from "next/headers";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { authClient } from "./libs/auth-client";
 
 export async function proxy(request: NextRequest) {
-	let sessionToken = request.cookies.get("better-auth.session_token");
-	if (appConfig.nodeEnv === "production") {
-		sessionToken = request.cookies.get("__Secure-better-auth.session_token");
-	}
+	// let sessionToken = request.cookies.get("better-auth.session_token");
+	// if (appConfig.nodeEnv === "production") {
+	// 	sessionToken = request.cookies.get("__Secure-better-auth.session_token");
+	// }
 
-	// const { data: sessionToken } = await authClient.getSession({
-	// 	fetchOptions: { headers: await headers() },
-	// });
+	const { data: sessionToken } = await authClient.getSession({
+		fetchOptions: { headers: await headers() },
+	});
 
 	const isLoginPage = request.nextUrl.pathname.startsWith("/login");
 
