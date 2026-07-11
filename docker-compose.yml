@@ -2,7 +2,7 @@
 x-defaults: &defaults
   restart: unless-stopped
   env_file:
-    - .env.prod
+    - .env
   networks:
     - internal
 
