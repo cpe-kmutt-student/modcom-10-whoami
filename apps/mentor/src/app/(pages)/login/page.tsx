@@ -16,7 +16,7 @@ export default function LoginPage(): React.JSX.Element {
 		setIsRedirecting(true);
 		await signIn.social({
 			provider: "microsoft",
-			callbackURL: process.env.NEXT_PUBLIC_MENTOR_BETTERAUTH_CALLBACK_URL, // Use absolute URL to redirect back to frontend
+			callbackURL: `${window.location.origin}/profile`, // Use absolute URL to redirect back to frontend
 		});
 	};
 

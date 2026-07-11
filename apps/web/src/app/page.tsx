@@ -25,7 +25,7 @@ export default function Home() {
       setIsClickingLogin(true);
       await authClient.signIn.social({
         provider: "microsoft",
-        callbackURL: `${process.env.NEXT_PUBLIC_SERVER_URL}/hint`,
+        callbackURL: `${window.location.origin}/hint`,
       });
     } catch (error) {
       console.error("Login failed", error);
