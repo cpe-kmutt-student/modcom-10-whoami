@@ -5,10 +5,9 @@ import { NextResponse } from "next/server";
 import { authClient } from "./libs/auth-client";
 
 export async function proxy(request: NextRequest) {
-	let sessionToken = request.cookies.get("better-auth.session_token");
-	if (process.env.NODE_ENV === "production") {
-		sessionToken = request.cookies.get("__Secure-better-auth.session_token");
-	}
+	const sessionToken =
+		request.cookies.get("better-auth.session_token")?.value ||
+		request.cookies.get("__Secure-better-auth.session_token")?.value;
 
 	console.log("env : ", process.env.NODE_ENV);
 	console.log("session : ", sessionToken);
