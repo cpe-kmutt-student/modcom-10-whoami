@@ -11,12 +11,12 @@ COPY packages ./packages
 RUN pnpm install --frozen-lockfile
 
 # Use placeholders for Next.js build-time env vars so they can be replaced at runtime
-ENV NEXT_PUBLIC_BACKEND_URL=__NEXT_PUBLIC_BACKEND_URL__
-ENV NEXT_PUBLIC_SERVER_URL=__NEXT_PUBLIC_SERVER_URL__
-ENV NEXT_PUBLIC_BACKEND_BASE_URL=__NEXT_PUBLIC_BACKEND_BASE_URL__
-ENV NEXT_PUBLIC_USE_MOCK=__NEXT_PUBLIC_USE_MOCK__
-ENV NEXT_PUBLIC_MENTOR_BETTERAUTH_CALLBACK_URL=__NEXT_PUBLIC_MENTOR_BETTERAUTH_CALLBACK_URL__
-ENV NEXT_PUBLIC_MENTOR_BETTERAUTH_SERVER_URL=__NEXT_PUBLIC_MENTOR_BETTERAUTH_SERVER_URL__
+ENV NEXT_PUBLIC_BACKEND_URL=http://placeholder.backend.url
+ENV NEXT_PUBLIC_SERVER_URL=http://placeholder.server.url
+ENV NEXT_PUBLIC_BACKEND_BASE_URL=http://placeholder.backend.base.url
+ENV NEXT_PUBLIC_USE_MOCK=false_placeholder
+ENV NEXT_PUBLIC_MENTOR_BETTERAUTH_CALLBACK_URL=http://placeholder.betterauth.callback.url
+ENV NEXT_PUBLIC_MENTOR_BETTERAUTH_SERVER_URL=http://placeholder.betterauth.server.url
 
 RUN pnpm --filter @repo/config run build
 RUN pnpm --filter @repo/database run generate
