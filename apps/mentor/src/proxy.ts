@@ -5,14 +5,14 @@ import { NextResponse } from "next/server";
 import { authClient } from "./libs/auth-client";
 
 export async function proxy(request: NextRequest) {
-	// let sessionToken = request.cookies.get("better-auth.session_token");
-	// if (appConfig.nodeEnv === "production") {
-	// 	sessionToken = request.cookies.get("__Secure-better-auth.session_token");
-	// }
+	let sessionToken = request.cookies.get("better-auth.session_token");
+	if (process.env.NODE_ENV === "production") {
+		sessionToken = request.cookies.get("__Secure-better-auth.session_token");
+	}
 
-	const { data: sessionToken } = await authClient.getSession({
-		fetchOptions: { headers: await headers() },
-	});
+	// const { data: sessionToken } = await authClient.getSession({
+	// 	fetchOptions: { headers: await headers() },
+	// });
 
 	const isLoginPage = request.nextUrl.pathname.startsWith("/login");
 
