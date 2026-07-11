@@ -10,6 +10,9 @@ export async function proxy(request: NextRequest) {
 		sessionToken = request.cookies.get("__Secure-better-auth.session_token");
 	}
 
+	console.log("env : ", process.env.NODE_ENV);
+	console.log("session : ", sessionToken);
+
 	// const { data: sessionToken } = await authClient.getSession({
 	// 	fetchOptions: { headers: await headers() },
 	// });
