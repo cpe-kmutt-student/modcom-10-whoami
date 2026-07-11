@@ -10,13 +10,12 @@ COPY packages ./packages
 
 RUN pnpm install --frozen-lockfile
 
-# Use placeholders for Next.js build-time env vars so they can be replaced at runtime
-ENV NEXT_PUBLIC_BACKEND_URL=http://placeholder.backend.url
-ENV NEXT_PUBLIC_SERVER_URL=http://placeholder.server.url
-ENV NEXT_PUBLIC_BACKEND_BASE_URL=http://placeholder.backend.base.url
-ENV NEXT_PUBLIC_USE_MOCK=false_placeholder
-ENV NEXT_PUBLIC_MENTOR_BETTERAUTH_CALLBACK_URL=http://placeholder.betterauth.callback.url
-ENV NEXT_PUBLIC_MENTOR_BETTERAUTH_SERVER_URL=http://placeholder.betterauth.server.url
+ENV NEXT_PUBLIC_MENTOR_BETTERAUTH_CALLBACK_URL="https://whoami-mentor.aboutnon.in.th/profile"
+ENV NEXT_PUBLIC_MENTOR_BETTERAUTH_SERVER_URL="https://whoami-api.aboutnon.in.th/api/auth"
+ENV NEXT_PUBLIC_BACKEND_BASE_URL="https://whoami-api.aboutnon.in.th"
+ENV NEXT_PUBLIC_USE_MOCK="false"
+ENV NEXT_PUBLIC_BACKEND_URL="https://whoami-api.aboutnon.in.th/api/auth"
+ENV NEXT_PUBLIC_SERVER_URL="https://whoami.aboutnon.in.th"
 
 RUN pnpm --filter @repo/config run build
 RUN pnpm --filter @repo/database run generate
@@ -35,10 +34,13 @@ RUN npm install -g dotenv-cli
 COPY --from=builder /app/apps/web/.next/standalone ./
 COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=builder /app/apps/web/public ./apps/web/public
-COPY apps/web/entrypoint.sh ./entrypoint.sh
-RUN chmod +x ./entrypoint.sh
+ENV NEXT_PUBLIC_MENTOR_BETTERAUTH_CALLBACK_URL="https://whoami-mentor.aboutnon.in.th/profile"
+ENV NEXT_PUBLIC_MENTOR_BETTERAUTH_SERVER_URL="https://whoami-api.aboutnon.in.th/api/auth"
+ENV NEXT_PUBLIC_BACKEND_BASE_URL="https://whoami-api.aboutnon.in.th"
+ENV NEXT_PUBLIC_USE_MOCK="false"
+ENV NEXT_PUBLIC_BACKEND_URL="https://whoami-api.aboutnon.in.th/api/auth"
+ENV NEXT_PUBLIC_SERVER_URL="https://whoami.aboutnon.in.th"
 
 ENV PORT=3000
 
-ENTRYPOINT ["./entrypoint.sh"]
-CMD ["dotenv", "-e", "../.env", "--", "node", "apps/web/server.js"]
+CMD ["node", "apps/web/server.js"]
