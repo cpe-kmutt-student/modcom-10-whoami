@@ -39,7 +39,7 @@ services:
       - /tmp
 
   watchtower:
-    image: containrrr/watchtower:latest
+    image: ghcr.io/nicholas-fedor/watchtower:latest
     restart: unless-stopped
     command:
       - --label-enable
