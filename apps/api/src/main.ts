@@ -25,9 +25,9 @@ async function bootstrap() {
 	app.use(bodyParser.urlencoded({ extended: true }));
 	app.getHttpAdapter().getInstance().set("trust proxy", 1);
 
-	if (config.nodeEnv === "development") {
-		app.setGlobalPrefix("api");
-	}
+	// if (config.nodeEnv === "development") {
+	app.setGlobalPrefix("api");
+	// }
 
 	await app.listen(config.backend.port);
 }

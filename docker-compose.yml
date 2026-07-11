@@ -9,7 +9,7 @@ x-defaults: &defaults
     - NEXT_PUBLIC_MENTOR_BETTERAUTH_CALLBACK_URL=${NEXT_PUBLIC_MENTOR_BETTERAUTH_CALLBACK_URL}
     - NEXT_PUBLIC_MENTOR_BETTERAUTH_SERVER_URL=${NEXT_PUBLIC_MENTOR_BETTERAUTH_SERVER_URL}
   env_file:
-    - .env
+    - .env.prod
   networks:
     - internal
 
