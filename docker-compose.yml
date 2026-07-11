@@ -12,13 +12,6 @@ x-defaults: &defaults
     - .env
   networks:
     - internal
-  logging:
-    driver: json-file
-    options:
-      max-size: "10m"
-      max-file: "5"
-  security_opt:
-    - no-new-privileges:true
 
 services:
   nginx:
