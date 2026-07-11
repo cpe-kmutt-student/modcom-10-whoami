@@ -7,55 +7,55 @@ x-defaults: &defaults
     - internal
 
 services:
-  nginx:
-    <<: *defaults
-    image: nginx:1.29-alpine
-    ports:
-      - "8030:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      api:
-        condition: service_started
-      web:
-        condition: service_started
-    healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1 || exit 1"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
-    read_only: true
-    tmpfs:
-      - /var/cache/nginx
-      - /var/run
-      - /tmp
+  # nginx:
+  #   <<: *defaults
+  #   image: nginx:1.29-alpine
+  #   ports:
+  #     - "8030:80"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #   depends_on:
+  #     api:
+  #       condition: service_started
+  #     web:
+  #       condition: service_started
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1 || exit 1"]
+  #     interval: 30s
+  #     timeout: 5s
+  #     retries: 3
+  #     start_period: 10s
+  #   read_only: true
+  #   tmpfs:
+  #     - /var/cache/nginx
+  #     - /var/run
+  #     - /tmp
 
-  watchtower:
-    image: ghcr.io/nicholas-fedor/watchtower:latest
-    restart: unless-stopped
-    command:
-      - --label-enable
-      - --cleanup
-      - --rolling-restart
-      - --interval
-      - "300"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      WATCHTOWER_CLEANUP: "true"
-      WATCHTOWER_INCLUDE_STOPPED: "false"
-      WATCHTOWER_REVIVE_STOPPED: "false"
-    networks:
-      - internal
+  # watchtower:
+  #   image: ghcr.io/nicholas-fedor/watchtower:latest
+  #   restart: unless-stopped
+  #   command:
+  #     - --label-enable
+  #     - --cleanup
+  #     - --rolling-restart
+  #     - --interval
+  #     - "300"
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   environment:
+  #     WATCHTOWER_CLEANUP: "true"
+  #     WATCHTOWER_INCLUDE_STOPPED: "false"
+  #     WATCHTOWER_REVIVE_STOPPED: "false"
+  #   networks:
+  #     - internal
 
   api:
     <<: *defaults
     image: ghcr.io/imjustnon/whoami-api:staging
     expose:
       - "3010"
-    labels:
-      com.centurylinklabs.watchtower.enable: "true"
+    # labels:
+    #   com.centurylinklabs.watchtower.enable: "true"
     ports: 
       - "3010:3010"
     restart: unless-stopped
@@ -68,8 +68,8 @@ services:
     depends_on:
       api:
         condition: service_started
-    labels:
-      com.centurylinklabs.watchtower.enable: "true"
+    # labels:
+    #   com.centurylinklabs.watchtower.enable: "true"
     ports: 
       - "3000:3000"
     restart: unless-stopped
@@ -83,8 +83,8 @@ services:
     depends_on:
       api:
         condition: service_started
-    labels:
-      com.centurylinklabs.watchtower.enable: "true"
+    # labels:
+    #   com.centurylinklabs.watchtower.enable: "true"
     ports: 
       - "3005:3005"
     restart: unless-stopped
