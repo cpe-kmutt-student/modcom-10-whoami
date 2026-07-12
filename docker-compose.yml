@@ -48,6 +48,18 @@ services:
   #     WATCHTOWER_REVIVE_STOPPED: "false"
   #   networks:
   #     - internal
+  
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel run --protocol http2
+    environment:
+      TUNNEL_TOKEN: ${CF_TUNNEL_TOKEN:?CF_TUNNEL_TOKEN is required}
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
 
   api:
     <<: *defaults
