@@ -23,14 +23,19 @@ fi
 # ---------------------------------------------------------------------------
 # Auto-replace all NEXT_PUBLIC_* placeholders.
 #
-# At build time, each variable is set to its own name as the placeholder
-# (e.g. NEXT_PUBLIC_BACKEND_URL="NEXT_PUBLIC_BACKEND_URL").
-# At runtime, we read every NEXT_PUBLIC_* env var and replace that name
-# with the real value inside the compiled Next.js output.
+# At build time (Dockerfile), each variable is set to a valid placeholder URL
+# derived from its own name, e.g.:
+#   NEXT_PUBLIC_BACKEND_URL="http://placeholder-next-public-backend-url.invalid"
 #
-# To add a new variable: just add it in the Dockerfile as
-#   ENV NEXT_PUBLIC_SOMETHING="NEXT_PUBLIC_SOMETHING"
-# and pass the real value at runtime — nothing else needs to change here.
+# This ensures libraries that validate URLs at build time (e.g. BetterAuth)
+# don't crash during Next.js static page prerendering.
+#
+# At runtime, we re-derive the same placeholder from the key name and replace
+# it with the real value — fully automatic, no hardcoded mappings needed.
+#
+# To add a new variable: just add it in the Dockerfile as:
+#   ENV NEXT_PUBLIC_SOMETHING="http://placeholder-next-public-something.invalid"
+# and pass the real value at runtime — nothing here needs to change.
 # ---------------------------------------------------------------------------
 NEXT_DIR="/app/apps/web/.next"
 
@@ -45,9 +50,13 @@ env | grep '^NEXT_PUBLIC_' | while read -r line; do
     continue
   fi
 
+  # Derive the same placeholder that was set in the Dockerfile:
+  # NEXT_PUBLIC_BACKEND_URL -> http://placeholder-next-public-backend-url.invalid
+  placeholder="http://placeholder-$(echo "$key" | tr '[:upper:]_' '[:lower:]-').invalid"
+
   echo "  Replacing: $key"
   find "$NEXT_DIR" -type f \( -name '*.js' -o -name '*.html' \) \
-    -exec sed -i "s#${key}#${value}#g" {} +
+    -exec sed -i "s#${placeholder}#${value}#g" {} +
 done
 
 echo "Environment injection complete."
