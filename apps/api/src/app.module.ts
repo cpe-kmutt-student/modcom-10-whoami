@@ -17,6 +17,7 @@ import { SyAccountModule } from "./modules/sy-account/sy-account.module";
 import { FySyContactModule } from "./modules/fy-sy-contact/fy-sy-contact.module";
 import { SyUpdateModule } from "./modules/sy-update/sy-update.module";
 import { SyJuniorHintModule } from "./modules/sy-junior-hint/sy-junior-hint.module";
+import { GbMemeModule } from "./modules/gb-meme/gb-meme.module";
 
 @Module({
 	imports: [
@@ -37,6 +38,7 @@ import { SyJuniorHintModule } from "./modules/sy-junior-hint/sy-junior-hint.modu
 		FySyContactModule,
 		SyUpdateModule,
 		SyJuniorHintModule,
+		GbMemeModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],
