@@ -80,7 +80,7 @@ export default function Loading({ isExiting = false, onExited }: LoadingProps) {
   }, [isExiting, dotLottieInstance]);
 
   return (
-    <div className="absolute inset-0 w-full h-full z-50">
+    <div className="fixed top-0 left-0 inset-0 w-full h-full z-50">
       <div
         className={`absolute inset-0 w-full h-full bg-blue-50 transition-opacity duration-500 ease-in-out ${
           mounted && !isExiting ? "opacity-100" : "opacity-0"

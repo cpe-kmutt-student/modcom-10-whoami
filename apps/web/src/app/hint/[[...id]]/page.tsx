@@ -52,7 +52,7 @@ function HintFlipCard({
 	const { studentData } = useUser();
 	return (
 		<div
-			className="relative w-full h-full transition-transform duration-700 ease-in-out"
+			className="select-none relative w-full h-full transition-transform duration-700 ease-in-out"
 			style={{
 				transformStyle: "preserve-3d",
 				transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",

@@ -16,8 +16,6 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Variants } from "motion";
 import { useUser } from "@/context/UserContext";
-import { useLoading } from "@/context/ExperienceContext";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useStudentGuard } from "@/hooks/useRouteGuard";
 
@@ -37,6 +35,9 @@ export interface UserSocials {
 export interface UserData {
   id: string;
   name: string;
+  nickname: string;
+  firstname: string;
+  lastname: string;
   program: string;
   imageUrl: string;
   socials?: UserSocials;
@@ -112,14 +113,38 @@ const mapSeniorContacts = (contacts: FySeniorContactResponse): UserData[] => {
       id: contact.syuser_uuid || `senior-${index}`,
       name:
         [
-          `(${contact.syuser_nickname})`,
-          contact.syuser_firstname,
-          contact.syuser_lastname,
+          contact.syuser_nickname && contact.syuser_nickname !== "***"
+            ? `(${contact.syuser_nickname})`
+            : null,
+          contact.syuser_firstname
+            ? contact.syuser_firstname
+                .toLowerCase()
+                .replace(/\b\w/g, (char) => char.toUpperCase())
+            : null,
+          contact.syuser_lastname
+            ? contact.syuser_lastname
+                .toLowerCase()
+                .replace(/\b\w/g, (char) => char.toUpperCase())
+            : null,
         ]
           .filter(Boolean)
           .join(" ") ||
         contact.syuser_nickname ||
         "Unknown",
+
+      nickname: contact.syuser_nickname && (contact.syuser_nickname !== "***")
+        ? contact.syuser_nickname
+        : "",
+      firstname: contact.syuser_firstname
+        ? contact.syuser_firstname
+            .toLowerCase()
+            .replace(/\b\w/g, (char) => char.toUpperCase())
+        : "",
+      lastname: contact.syuser_lastname
+        ? contact.syuser_lastname
+            .toLowerCase()
+            .replace(/\b\w/g, (char) => char.toUpperCase())
+        : "",
       program: contact.sycontact_department || "Unknown",
       imageUrl:
         contact.sycontact_url ||
@@ -133,18 +158,8 @@ const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      delayChildren: 0.3,
-      staggerChildren: 0.2,
-    },
   },
-  exit: {
-    opacity: 0,
-    transition: {
-      staggerChildren: 0.1,
-      staggerDirection: -1,
-    },
-  },
+  exit: { opacity: 0 },
 };
 
 const itemVariants: Variants = {
@@ -153,17 +168,23 @@ const itemVariants: Variants = {
     scale: 1,
     opacity: 1,
     transition: {
-      delay: index * 0.1,
+      delay: Math.min(index * 0.05, 1.0),
       type: "spring",
-      bounce: 0.6,
-      duration: 0.8,
+      bounce: 0.4,
+      duration: 0.5,
     },
   }),
-  exit: (index: number) => ({
+  exit: {
     opacity: 0,
     scale: 0.9,
-    transition: { delay: index * 0.05, duration: 0.2 },
-  }),
+    transition: { duration: 0.2 },
+  },
+};
+
+const programOrder:Record<string, number> = {
+  reg: 1,
+  inter: 2,
+  hds: 3,
 };
 
 export default function List() {
@@ -227,10 +248,31 @@ export default function List() {
 
   if (isChecking) return null;
 
-  const filteredData = seniorContacts.filter((pData) => {
-    if (selectedPrograms.length === 0) return true;
-    return selectedPrograms.includes(pData.program.toLowerCase());
-  });
+  const filteredData = seniorContacts
+    .filter((pData) => {
+      if (selectedPrograms.length === 0) return true;
+      return selectedPrograms.includes(pData.program.toLowerCase());
+    })
+    .sort((a, b) => {
+      const progA = a.program.toLowerCase();
+      const progB = b.program.toLowerCase();
+
+      const orderA = programOrder[progA] || 99;
+      const orderB = programOrder[progB] || 99;
+
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
+
+      const hasNickA = Boolean(a.nickname && a.nickname !== "");
+      const hasNickB = Boolean(b.nickname && b.nickname !== "");
+
+      if (hasNickA !== hasNickB) {
+        return hasNickA ? -1 : 1;
+      }
+
+      return a.firstname.localeCompare(b.firstname);
+    });
 
   return (
     <div className="flex justify-center">
@@ -308,7 +350,7 @@ export default function List() {
             ) : (
               filteredData.map((pData, index) => (
                 <motion.div
-                  layout
+                  layout="position"
                   custom={index}
                   variants={itemVariants}
                   initial="hidden"
@@ -316,13 +358,22 @@ export default function List() {
                   exit="exit"
                   key={pData.id}
                   onClick={() => setSelectedProfile(pData)}
-                  className="flex items-start p-6 rounded-3xl border-2 border-blue-900 bg-cloud text-blue-900 shadow-[4px_4px_0px_0px_var(--color-blue-900)] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all duration-200 cursor-pointer"
+                  whileHover={{
+                    x: 4,
+                    y: 4,
+                    boxShadow: "none",
+                  }}
+                  className="flex items-start p-6 rounded-3xl border-2 border-blue-900 bg-cloud text-blue-900 shadow-[4px_4px_0px_0px_var(--color-blue-900)] cursor-pointer"
                 >
                   <Image
                     src={pData.imageUrl}
                     alt={pData.name}
+
                     width={64}
                     height={64}
+                    onError={(e) => {
+                      e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(pData.name.replace(/[()]/g, ""))}&background=random`;
+                    }}
                     className="w-16 h-16 rounded-full object-cover mr-4 shrink-0"
                   />
 
@@ -440,9 +491,13 @@ export default function List() {
                 <Image
                   src={selectedProfile.imageUrl}
                   alt={selectedProfile.name}
+
                   width={400}
                   height={400}
                   className="w-full h-auto max-h-[350px] rounded-sm object-contain "
+                  onError={(e) => {
+                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedProfile.name.replace(/[()]/g, ""))}&background=random`;
+                  }}
                 />
               </div>
 

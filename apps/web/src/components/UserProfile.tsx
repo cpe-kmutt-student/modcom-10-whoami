@@ -60,8 +60,15 @@ export default function UserProfile() {
         <div className="hidden md:flex flex-col items-start">
           <span className="text-sm font-bold font-mali text-blue-900 leading-tight">
             {t("user_profile.name", {
-              firstname: studentData?.name.split(" ")[0] ?? "",
-              fullname: studentData?.name ?? "",
+              firstname:
+                studentData?.name
+                  .toLowerCase()
+                  .replace(/\b\w/g, (char) => char.toUpperCase())
+                  .split(" ")[0] ?? "",
+              fullname:
+                studentData?.name
+                  .toLowerCase()
+                  .replace(/\b\w/g, (char) => char.toUpperCase()) ?? "",
             })}
           </span>
           <span className="text-[10px] font-sans font-bold text-blue-600 leading-tight">
@@ -90,7 +97,9 @@ export default function UserProfile() {
             <div className="p-5 pt-3 border-b-3 border-blue-900 bg-white flex flex-col gap-3">
               <div className="flex flex-col">
                 <span className="text-lg font-bold font-mali text-blue-900 truncate">
-                  {studentData?.name}
+                  {studentData?.name
+                    .toLowerCase()
+                    .replace(/\b\w/g, (char) => char.toUpperCase())}
                 </span>
                 <span className="text-xs font-sans font-bold text-blue-500">
                   {t("program.full." + (studentData?.program ?? "reg"))}
