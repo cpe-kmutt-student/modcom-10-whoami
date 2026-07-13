@@ -23,7 +23,11 @@ export async function proxy(request: NextRequest) {
 	}
 
 	if (sessionToken && isLoginPage) {
-		return NextResponse.redirect(new URL("/", request.url));
+		return NextResponse.redirect(new URL("/profile", request.url));
+	}
+
+	if (sessionToken && request.nextUrl.pathname.endsWith("/")) {
+		return NextResponse.redirect(new URL("/profile", request.url));
 	}
 
 	return NextResponse.next();

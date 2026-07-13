@@ -6,7 +6,7 @@ import { type Response } from "express";
 export class GbMemeController {
 	constructor(private readonly gbMemeService: GbMemeService) {}
 
-	@Get("/random")
+	@Get("/random/:n")
 	getRandomMeme(@Res() res: Response) {
 		return this.gbMemeService.getRandomMeme(res);
 	}

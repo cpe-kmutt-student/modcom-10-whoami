@@ -3,7 +3,7 @@ import { faPeopleGroup } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { Variants } from "motion";
 import { AnimatePresence, LayoutGroup, motion } from "motion/react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useRef, useState } from "react";
 import BackButton from "@/components/BackButton";
@@ -43,6 +43,12 @@ function HintFlipCard({
 	hintImage: string;
 	isFlipped: boolean;
 }) {
+	const pathname = usePathname();
+	const imgRef = useRef<HTMLImageElement>(null);
+	useEffect(() => {
+		if (imgRef.current)
+			imgRef.current.src = `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/_/gb/meme/random/${Math.random()}`;
+	}, [pathname]);
 	const { studentData } = useUser();
 	return (
 		<div
@@ -90,12 +96,11 @@ function HintFlipCard({
 					transform: "rotateY(180deg)",
 				}}
 			>
-				{/* <img src="https://s3.aboutnon.in.th/upload/hint-3-1783869712374?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=QJlidKH7MoZ1NUa0Hwpx%2F20260713%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260713T102253Z&X-Amz-Expires=1800&X-Amz-Signature=f4733af9784d582cf0cf689aa51f0b9ed5a875e0b894949b020071cfaaee1724&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject" className="w-full h-full object-cover" alt={`hint_image_${studentData?.studentID.slice(-4)}`} /> */}
-				{/* <div className="text-center font-sans">
-          <div className="text-black px-3 md:px-8 py-1 md:py-3 bg-white text-xl md:text-4xl">
-            {studentData?.studentID.slice(-4)}
-          </div>
-        </div> */}
+				<img
+					ref={imgRef}
+					className="w-full h-full object-contain"
+					alt={`hint_image_${studentData?.studentID.slice(-4)}`}
+				/>
 			</div>
 		</div>
 	);
