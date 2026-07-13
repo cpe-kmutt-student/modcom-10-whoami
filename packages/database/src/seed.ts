@@ -247,18 +247,84 @@ class PrismaSeed {
 	}
 
 	async seedMapJuniorAndSenior() {
-		// try {
-		// 	for(const reportRes of this.report_res){
-		// 		const checkIsLink =
-		// 		await prisma.firstYearUserAndSecondYearUserJoiner.create({
-		// 			data: {
-		// 			}
-		// 		})
-		// 	}
-		// }
-		// catch(e){
-		// 	console.log(e);
-		// }
+		try {
+			// clear db
+			await prisma.firstYearUserAndSecondYearUserJoiner.deleteMany();
+
+			// get 69 user
+			const getAvailableJunior = await prisma.firstYearUser.findMany({
+				where: {
+					fyuser_id: {
+						startsWith: "69",
+					},
+				},
+			});
+
+			const totalMatch = [];
+			const totalMissing = [];
+
+			// check with 68 user if match
+			for (const { fyuser_id } of getAvailableJunior) {
+				const last4digit = fyuser_id.slice(-4);
+				const getAvailableSenior = await prisma.secondYearUser.findMany({
+					where: {
+						syuser_id: {
+							endsWith: last4digit,
+						},
+					},
+				});
+				if (getAvailableSenior.length === 0) {
+					totalMissing.push(fyuser_id);
+					continue;
+				}
+
+				const createJoiner =
+					await prisma.firstYearUserAndSecondYearUserJoiner.create({
+						data: {
+							fyuser_id: fyuser_id,
+							syuser_id: getAvailableSenior[0]!.syuser_id,
+						},
+					});
+				totalMatch.push(fyuser_id);
+			}
+
+			console.log(totalMatch.length);
+			console.log(totalMissing);
+		} catch (e) {
+			console.log(e);
+		}
+	}
+
+	async checkTotalSeniorNoJunior() {
+		try {
+			const getAvailableSenior = await prisma.secondYearUser.findMany({
+				where: {
+					syuser_id: {
+						startsWith: "68",
+					},
+				},
+			});
+
+			const totalMissing = [];
+			for (const { syuser_id } of getAvailableSenior) {
+				const last4digit = syuser_id.slice(-4);
+				const getAvailableJunior = await prisma.firstYearUser.findMany({
+					where: {
+						fyuser_id: {
+							endsWith: last4digit,
+						},
+					},
+				});
+
+				if (getAvailableJunior.length === 0) {
+					totalMissing.push(syuser_id);
+				}
+			}
+
+			console.log(totalMissing);
+		} catch (e) {
+			console.log(e);
+		}
 	}
 
 	async seedHint1() {
@@ -294,4 +360,5 @@ const prismaSeed = new PrismaSeed(prisma, adapter);
 // prismaSeed.seedUser69();
 // prismaSeed.seedUser68();
 // prismaSeed.seedMapJuniorAndSenior();
+prismaSeed.checkTotalSeniorNoJunior();
 // prismaSeed.seedContact();
