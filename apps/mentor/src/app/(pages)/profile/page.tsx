@@ -11,6 +11,7 @@ import {
 	LogOut,
 	Plus,
 	Save,
+	Trash2,
 	User,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -118,6 +119,16 @@ export default function ProfilePage(): React.JSX.Element {
 			...contacts,
 			{ platform: Object.keys(ContactPlatform)[0] || "", value: "" },
 		]);
+	};
+
+	const handleDeleteContactField = (deleteIndex: number) => {
+		setContacts((prev) => {
+			if (prev.length <= 1) {
+				return [{ platform: Object.keys(ContactPlatform)[0] || "", value: "" }];
+			}
+
+			return prev.filter((_, index) => index !== deleteIndex);
+		});
 	};
 
 	const handleSignOut = async () => {
@@ -350,6 +361,14 @@ export default function ProfilePage(): React.JSX.Element {
 												);
 											}}
 										/>
+										<button
+											type="button"
+											className="ml-2 mt-2 h-10 w-10 shrink-0 rounded-xl border-[2px] border-[#ffd2d2] bg-[#fff1f1] text-[#c92a2a] hover:bg-[#ffe4e4] duration-300"
+											onClick={() => handleDeleteContactField(index)}
+											aria-label={`Delete contact ${index + 1}`}
+										>
+											<Trash2 size={18} className="mx-auto" />
+										</button>
 									</div>
 								))}
 							</div>
