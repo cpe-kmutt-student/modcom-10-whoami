@@ -122,22 +122,25 @@ export default function Home() {
             </div>
           </button>
 
-          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[320px] text-center pointer-events-auto">
-            <p className="text-xs leading-relaxed font-mali text-blue-900/70 text-center max-w-xs mt-2">
-              {t("home.login_mean")}{" "}
-              <a
-                onClick={() => router.push("/privacy-policy")}
-                className="cursor-pointer text-nowrap font-bold text-blue-900 underline decoration-2 decoration-blue-900/30 hover:decoration-quirky hover:text-blue-600 transition-colors"
-              >
-                {t("home.privacy_policy")}
-              </a>{" "}
-              {t("home.and")}{" "}
-              <a
-                onClick={() => router.push("/terms-of-service")}
-                className="cursor-pointer text-nowrap font-bold text-blue-900 underline decoration-2 decoration-blue-900/30 hover:decoration-quirky hover:text-blue-600 transition-colors"
-              >
-                {t("home.terms_of_service")}
-              </a>{" "}
+          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[350px] text-center pointer-events-auto">
+            <p className="text-xs leading-relaxed font-mali text-blue-900/70 text-center max-w-sm mt-2 flex flex-col">
+              <span>{t("home.login_mean")}{" "}</span>
+              <span>
+                <a
+                  onClick={() => router.push("/privacy-policy")}
+                  className="cursor-pointer text-nowrap font-bold text-blue-900 underline decoration-2 decoration-blue-900/30 hover:decoration-quirky hover:text-blue-600 transition-colors"
+                >
+                  {t("home.privacy_policy")}
+                </a>
+                {" "}{t("home.and")}{" "}
+                <a
+                  onClick={() => router.push("/terms-of-service")}
+                  className="cursor-pointer text-nowrap font-bold text-blue-900 underline decoration-2 decoration-blue-900/30 hover:decoration-quirky hover:text-blue-600 transition-colors"
+                >
+                  {t("home.terms_of_service")}
+                </a>
+                  {" "}
+              </span>
               <span className="text-nowrap">{t("home.of_us")}</span>
             </p>
           </div>
