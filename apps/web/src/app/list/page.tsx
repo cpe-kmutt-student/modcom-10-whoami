@@ -364,6 +364,7 @@ export default function List() {
 									className="flex items-start p-6 rounded-3xl border-2 border-blue-900 bg-cloud text-blue-900 shadow-[4px_4px_0px_0px_var(--color-blue-900)] cursor-pointer"
 								>
 									<Image
+										unoptimized={true}
 										src={pData.imageUrl}
 										alt={pData.name}
 										// unoptimized={true}
@@ -488,6 +489,7 @@ export default function List() {
 
 							<div className="w-full relative mt-6 mb-6 overflow-hidden flex items-center justify-center min-h-[250px]">
 								<Image
+									unoptimized={true}
 									src={selectedProfile.imageUrl}
 									alt={selectedProfile.name}
 									// unoptimized={true}
