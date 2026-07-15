@@ -1,4 +1,4 @@
-import { ForbiddenException, HttpException, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, HttpException, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
 import { config } from "@repo/config";
 import { getPreSignUrl } from "@repo/storage";
 import { Request } from "express";
@@ -112,46 +112,48 @@ export class FyQuestService {
 
 	async setOpenedBox(userId: string, hintIndex: string) {
 		try {
-			const getFyQuest = await this.prisma.client.user.findUnique({
+			// get studentId
+			const getFyUser = await this.prisma.client.user.findUnique({
 				where: {
 					id: userId,
-					joiner_fyuser: {
-						some: {
-							fyuser: {
-								fyquest: {
-									some: {
-										fyquest_index: parseInt(hintIndex),
-									},
-								},
-							},
-						},
-					},
 				},
 				include: {
 					joiner_fyuser: {
 						include: {
-							fyuser: {
-								include: {
-									fyquest: true,
-								},
-							},
+							fyuser: true,
 						},
 					},
 				},
 			});
 
-			if (!getFyQuest) throw new ForbiddenException();
+			const studentId = getFyUser!.joiner_fyuser[0].fyuser.fyuser_id;
 
-			const updateStatus = await this.prisma.client.firstYearQuest.update({
+			const getFyHint = await this.prisma.client.firstYearUser.findUnique({
 				where: {
-					fyquest_id: getFyQuest.joiner_fyuser[0].fyuser.fyquest[0].fyquest_id,
+					fyuser_id: studentId,
+				},
+				include: {
+					fyquest: true,
+				},
+			});
+
+			const filterHintById = getFyHint?.fyquest.find((q) => q.fyquest_index === parseInt(hintIndex));
+
+			if (!filterHintById) throw new NotFoundException(`No Hint index : ${hintIndex} : found in db`);
+
+			const targetHintId = filterHintById.fyquest_id;
+
+			// update hint box open status
+			const updateBoxStatus = await this.prisma.client.firstYearQuest.update({
+				where: {
+					fyquest_id: targetHintId,
 				},
 				data: {
 					fyquest_status_boxopen: true,
 				},
 			});
 
-			return updateStatus;
+			return updateBoxStatus;
 		} catch (e) {
 			this.logger.error(e);
 			if (e instanceof HttpException) {
