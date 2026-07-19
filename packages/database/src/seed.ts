@@ -4,6 +4,11 @@ import process from "node:process";
 import type { PrismaPg } from "@prisma/adapter-pg";
 import { config } from "@repo/config";
 import type { IFirstYear } from "./@types/firstYear.type";
+import type {
+	HDSMapType,
+	InterMapType,
+	RegMapType,
+} from "./@types/MapFySy.type";
 import type { ReportResponse } from "./@types/ReportResponse.type";
 import {
 	adapter,
@@ -25,6 +30,9 @@ class PrismaSeed {
 	private regular_69: IFirstYear = [];
 
 	private report_res: ReportResponse = [];
+	private hds_fysy_map: HDSMapType = [];
+	private inter_fysy_map: InterMapType = [];
+	private reg_fysy_map: RegMapType = [];
 
 	constructor(prisma: PrismaClient, adapter: PrismaPg) {
 		this.adapter = adapter;
@@ -64,6 +72,21 @@ class PrismaSeed {
 				"utf8",
 			);
 
+			const loadFySyMapHDS = fs.readFileSync(
+				path.join(process.cwd(), "/src/seed/hds_mentor_mapping_array.json"),
+				"utf8",
+			);
+
+			const loadFySyMapInter = fs.readFileSync(
+				path.join(process.cwd(), "/src/seed/inter_mentor_mapping_array.json"),
+				"utf8",
+			);
+
+			const loadFySyMapReg = fs.readFileSync(
+				path.join(process.cwd(), "/src/seed/reg_mentor_mapping_array.json"),
+				"utf8",
+			);
+
 			this.hds_68 = JSON.parse(loadHDS68);
 			this.inter_68 = JSON.parse(loadInter68);
 			this.regular_68 = JSON.parse(loadRegular68);
@@ -71,6 +94,10 @@ class PrismaSeed {
 			this.inter_69 = JSON.parse(loadInter69);
 			this.regular_69 = JSON.parse(loadRegular69);
 			this.report_res = JSON.parse(loadReportRes);
+
+			this.hds_fysy_map = JSON.parse(loadFySyMapHDS);
+			this.inter_fysy_map = JSON.parse(loadFySyMapInter);
+			this.reg_fysy_map = JSON.parse(loadFySyMapReg);
 		} catch (e) {
 			console.log(e);
 		}
@@ -353,12 +380,88 @@ class PrismaSeed {
 			console.log(e);
 		}
 	}
+
+	async deleteMapFySy() {
+		try {
+			const deleteMap =
+				await prisma.firstYearUserAndSecondYearUserJoiner.deleteMany();
+			console.log(deleteMap);
+		} catch (e) {
+			console.log(e);
+		}
+	}
+
+	async seedMapFySyHDS() {
+		try {
+			for (const hdsSy of this.hds_fysy_map) {
+				const syUserId = hdsSy.senior_id;
+				for (const hdsFy of hdsSy.juniors) {
+					const createJoiner =
+						await prisma.firstYearUserAndSecondYearUserJoiner.create({
+							data: {
+								syuser_id: syUserId,
+								fyuser_id: hdsFy.id,
+							},
+						});
+					console.log(createJoiner);
+				}
+			}
+		} catch (e) {
+			console.log(e);
+		}
+	}
+
+	async seedMapFySyInter() {
+		try {
+			for (const interSy of this.inter_fysy_map) {
+				const syUserId = interSy.senior_id;
+				for (const interFy of interSy.juniors) {
+					if (!interFy.id) break;
+					const createJoiner =
+						await prisma.firstYearUserAndSecondYearUserJoiner.create({
+							data: {
+								syuser_id: syUserId,
+								fyuser_id: interFy.id,
+							},
+						});
+					console.log(createJoiner);
+				}
+			}
+		} catch (e) {
+			console.log(e);
+		}
+	}
+
+	async seedMapFySyReg() {
+		try {
+			for (const regSy of this.reg_fysy_map) {
+				const syUserId = regSy.senior_id;
+				for (const regFy of regSy.juniors) {
+					if (!regFy.id) break;
+					const createJoiner =
+						await prisma.firstYearUserAndSecondYearUserJoiner.create({
+							data: {
+								syuser_id: syUserId,
+								fyuser_id: regFy.id,
+							},
+						});
+					console.log(createJoiner);
+				}
+			}
+		} catch (e) {
+			console.log(e);
+		}
+	}
 }
 
 // Run seed
 const prismaSeed = new PrismaSeed(prisma, adapter);
+// prismaSeed.seedMapFySyReg();
+// prismaSeed.deleteMapFySy();
+// prismaSeed.seedMapFySyHDS();
+// prismaSeed.seedMapFySyInter();
 // prismaSeed.seedUser69();
 // prismaSeed.seedUser68();
 // prismaSeed.seedMapJuniorAndSenior();
-prismaSeed.checkTotalSeniorNoJunior();
+// prismaSeed.checkTotalSeniorNoJunior();
 // prismaSeed.seedContact();
