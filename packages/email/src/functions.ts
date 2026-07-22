@@ -12,7 +12,7 @@ export async function sendHintNotification(
 			HintNotificationEmail({
 				menteeName: name,
 				hint: hint,
-				url: "https://comcamp.io",
+				url: "https://whoami.cpesu.com/hint",
 			}),
 		);
 		return await sender(email, "🔍 ใบ้ใหม่จากพี่รหัสมาเเล้ว มาตามหาพี่ๆ กันเถอะ", html);
