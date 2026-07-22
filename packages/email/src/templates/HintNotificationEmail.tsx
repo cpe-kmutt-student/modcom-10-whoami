@@ -28,8 +28,12 @@ export default function NewHintEmail({
 		<Html>
 			<Head>
 				<Font
-					fontFamily="Helvetica"
+					fontFamily="Prompt"
 					fallbackFontFamily="Arial"
+					webFont={{
+						url: "https://github.com/cadsondemak/prompt/raw/refs/heads/master/font/Prompt-Regular.ttf",
+						format: "truetype",
+					}}
 					fontWeight={400}
 					fontStyle="normal"
 				/>
@@ -43,10 +47,10 @@ export default function NewHintEmail({
 						{/* Header */}
 						<Section className="bg-gradient-to-r from-amber-600 to-blue-600 px-8 pt-12 pb-5 text-center">
 							<Text className="m-0 text-2xl font-bold uppercase tracking-[4px] text-amber-600 mb-3">
-								ModCom
+								Who Am I
 							</Text>
 							<Text className="m-0 text-sm font-bold uppercase tracking-[4px] text-amber-600">
-								Mentor • Mentee
+								พี่รหัสของน้องเป็นใครเอ่ย...
 							</Text>
 
 							<Heading className="m-0 mt-4 font-bold text-black flex flex-col">
@@ -56,23 +60,25 @@ export default function NewHintEmail({
 						</Section>
 
 						{/* Body */}
-						<Section className="px-8 pb-10 ">
-							<Text className="text-lg leading-8 text-black">
-								สวัสดีคับบ น้อง<strong>{menteeName}</strong> 👋
-							</Text>
+						<Section className="px-8 pb-10">
+							<Section className="pl-10">
+								<Text className="text-lg leading-8 text-black">
+									สวัสดีคับบ น้อง<strong>{menteeName}</strong> 👋
+								</Text>
 
-							<Text className="mt-4 text-base leading-8 text-black">
-								พี่รหัสของน้องได้ส่ง
-								<strong> คำใบ้ใหม่ </strong>
-								มาให้แล้ว!
-							</Text>
+								<Text className="mt-4 text-base leading-8 text-black">
+									พี่รหัสของน้องได้ส่ง
+									<strong> คำใบ้ใหม่ </strong>
+									มาให้แล้ว!
+								</Text>
 
-							<Text className="mt-2 text-base leading-8 text-black">
-								ลองใช้คำใบ้นี้เดาดูซิว่า พี่รหัสของน้องเป็นใครเอ่ยยย?? 🕵🏻‍♂️
-							</Text>
+								<Text className="mt-2 text-base leading-8 text-black">
+									ลองใช้คำใบ้นี้เดาดูซิว่า พี่รหัสของน้องเป็นใครเอ่ยยย?? 🕵🏻‍♂️
+								</Text>
+							</Section>
 
 							{/* Hint Card */}
-							<Section className="my-10 rounded-2xl border border-amber-100 bg-amber-50 px-8 py-8 text-center">
+							{/* <Section className="my-10 rounded-2xl border border-amber-100 bg-amber-50 px-8 py-8 text-center">
 								<Text className="m-0 text-lg font-bold uppercase tracking-[3px] text-amber-600">
 									💡 Hint
 								</Text>
@@ -80,7 +86,7 @@ export default function NewHintEmail({
 								<Text className="mt-6 text-lg font-bold italic leading-10 text-black">
 									"{hint}"
 								</Text>
-							</Section>
+							</Section> */}
 
 							{/* CTA */}
 							<Section className="my-12 text-center">
@@ -88,7 +94,7 @@ export default function NewHintEmail({
 									href={url}
 									className="rounded-full bg-amber-600 px-20 py-5 text-base font-bold text-white no-underline"
 								>
-									🔍 ดูคำใบ้ทั้งหมด
+									🔍 ดูคำใบ้เลยยย
 								</Button>
 
 								<Text className="mt-6 text-sm text-black">
@@ -113,9 +119,9 @@ export default function NewHintEmail({
 							</Text>
 
 							<Section className="mt-6 text-xs text-black flex flex-col items-center">
-								<Text>อีเมลฉบับนี้ได้ถูกส่งโดยมนุษย์</Text>
+								<Text>อีเมลฉบับนี้ได้ถูกส่งโดยคนคนนั้น</Text>
 								<Text className="mt-[-15px]">
-									โปรดอย่าตอบกลับเพราะมนุษย์ไม่เข้าใจภาษาของโปรแกรมเมอร์ 🧑‍💻
+									โปรดอย่าตอบกลับเพราะเอเลี่ยนไม่เข้าใจภาษาของมนุษย์ 👽
 								</Text>
 							</Section>
 						</Section>
