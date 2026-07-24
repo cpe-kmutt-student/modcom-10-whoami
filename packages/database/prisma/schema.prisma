@@ -41,6 +41,8 @@ model FirstYearUser {
   fyuser_lastname       String            @db.VarChar(50)
   fyuser_email          String            @unique @db.VarChar(50) 
 
+  fyuser_annotation     String?           @db.Text
+
   fyquest               FirstYearQuest[]
   joiner_user           FirstYearUserAndUserJoiner[]           
 
