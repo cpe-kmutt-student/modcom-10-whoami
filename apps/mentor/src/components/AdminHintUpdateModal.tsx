@@ -11,7 +11,7 @@ import axios from "axios";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 
-export default function HintUpdateModal({
+export default function AdminHintUpdateModal({
 	isOpen,
 	onOpen,
 	onClose,
@@ -34,8 +34,11 @@ export default function HintUpdateModal({
 
 	useEffect(() => {
 		(async () => {
+			if (!isOpen) return;
 			try {
 				setPreviewUrl(null);
+				// We can try to fetch the existing hint image if available.
+				// Since this is admin, we assume they can view it.
 				const getHint = await axios.get(
 					`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/_/sy/junior-hint/${juniorId}/${hintIndex}`,
 				);
@@ -44,7 +47,7 @@ export default function HintUpdateModal({
 				setPreviewUrl(null);
 			}
 		})();
-	}, [hintIndex, juniorId]);
+	}, [hintIndex, juniorId, isOpen]);
 
 	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const selectedFile = event.target.files?.[0];
@@ -71,7 +74,7 @@ export default function HintUpdateModal({
 
 			axios.defaults.withCredentials = true;
 			await axios.post(
-				`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/_/sy/update/hint`,
+				`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/_/admin/sy/update/hint`,
 				formData,
 				{
 					headers: {
@@ -82,7 +85,7 @@ export default function HintUpdateModal({
 
 			toast({
 				status: "success",
-				description: "Updated",
+				description: "Hint successfully updated by admin",
 				position: "top",
 				duration: 2500,
 				isClosable: true,
@@ -91,7 +94,7 @@ export default function HintUpdateModal({
 			reload();
 		} catch (error) {
 			toast({
-				status: "success",
+				status: "error",
 				description: "Internal Server Error",
 				position: "top",
 				duration: 2500,
@@ -125,7 +128,9 @@ export default function HintUpdateModal({
 					<ModalBody paddingY={"1.5rem"} paddingX={"1.5rem"}>
 						<div className="flex flex-col w-full text-black gap-5">
 							<div className="text-black text-center font-bold text-md">
-								Hint {hintIndex}
+								<div>
+									{juniorId} : Hint {hintIndex}
+								</div>
 							</div>
 							<div className="flex flex-col gap-5">
 								<div className="flex flex-col gap-2 items-center">
@@ -166,7 +171,7 @@ export default function HintUpdateModal({
 								<div className="flex flex-row justify-center">
 									<button
 										type="button"
-										disabled={isUploading}
+										disabled={isUploading || !file}
 										className="flex flex-row items-center justify-center gap-2 text-center font-bold text-white bg-[#18b0f7] hover:bg-[#18b0f7]/70 active:bg-[#18b0f7]/50 disabled:bg-gray-400 duration-300 cursor-pointer w-full py-2 rounded-lg"
 										onClick={handleUpload}
 									>

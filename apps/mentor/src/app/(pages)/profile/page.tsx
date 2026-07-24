@@ -44,6 +44,9 @@ export default function ProfilePage(): React.JSX.Element {
 	});
 	const [triggerAfterFetchUser, setTriggerAfterFetchUser] = useState<number>(0);
 	const [junior, setJunior] = useState([]);
+	const [isUploading, setIsUploading] = useState<boolean>(false);
+	const [isSaving, setIsSaving] = useState<boolean>(false);
+	const [isPageLoading, setIsPageLoading] = useState<boolean>(true);
 
 	const linkAccount = useDisclosure();
 	const linkAccountIsOpen = linkAccount.isOpen;
@@ -83,6 +86,8 @@ export default function ProfilePage(): React.JSX.Element {
 				setTriggerAfterFetchUser((prev) => prev++);
 			} catch (e) {
 				linkAccountOnOpen();
+			} finally {
+				setIsPageLoading(false);
 			}
 		})();
 	}, [reload]);
@@ -143,6 +148,7 @@ export default function ProfilePage(): React.JSX.Element {
 	const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (file) {
+			setIsUploading(true);
 			try {
 				const formData = new FormData();
 				formData.append("file", file);
@@ -175,11 +181,14 @@ export default function ProfilePage(): React.JSX.Element {
 					isClosable: true,
 				});
 				console.error("Failed to upload profile picture:", error);
+			} finally {
+				setIsUploading(false);
 			}
 		}
 	};
 
 	const handleAboutSubmit = async () => {
+		setIsSaving(true);
 		try {
 			axios.defaults.withCredentials = true;
 			const updateAbout = await axios.post(
@@ -205,8 +214,26 @@ export default function ProfilePage(): React.JSX.Element {
 				isClosable: true,
 			});
 			console.log("Error to update info: ", e);
+		} finally {
+			setIsSaving(false);
 		}
 	};
+
+	if (isPageLoading) {
+		return (
+			<>
+				<LinkAccountModal
+					isOpen={linkAccountIsOpen}
+					onOpen={linkAccountOnOpen}
+					onClose={linkAccountOnClose}
+					reload={() => setReload((prev) => prev + 1)}
+				/>
+				<div className="flex justify-center items-center min-h-screen">
+					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+				</div>
+			</>
+		);
+	}
 
 	return (
 		<>
@@ -227,12 +254,14 @@ export default function ProfilePage(): React.JSX.Element {
 			<div className="container mx-auto w-full text-black">
 				<div className="flex flex-row justify-center max-w-3xl mx-auto">
 					<div className="w-full my-14 mx-5">
-						<div className="text-3xl font-extrabold">Mentor's Profile</div>
-						<div className="text-base">
+						<div className="text-3xl font-extrabold text-white">
+							Mentor's Profile
+						</div>
+						<div className="text-base text-white">
 							Add your details and three hints. Mentees will use these clues to
 							find the right mentor.
 						</div>
-						<div className="mt-10 rounded-3xl px-8 border shadow-2xl mb-5 py-8 flex flex-col bg-white relative">
+						<div className="mt-10 rounded-3xl px-8 shadow-2xl mb-5 py-8 flex flex-col bg-[white] bg-opacity-95 relative">
 							<button
 								type="button"
 								className="absolute right-5 top-5 w-12 h-12 border rounded-2xl hover:bg-[#ffbfbf] duration-300 hover:shadow-xl active:scale-[.97]"
@@ -252,6 +281,7 @@ export default function ProfilePage(): React.JSX.Element {
 										"w-28 h-28 rounded-full hover:bg-[#bbbbbb] duration-300 flex justify-center items-center cursor-pointer group overflow-hidden relative",
 										{
 											"bg-[#E6E9EE]": !profile,
+											"opacity-70 pointer-events-none": isUploading,
 										},
 									)}
 									style={
@@ -266,26 +296,35 @@ export default function ProfilePage(): React.JSX.Element {
 									}
 									onClick={handleUploadClick}
 								>
-									<Camera
-										className={clsx(
-											"text-black z-10 transition-opacity duration-300",
-											{
-												"opacity-100": !profile,
-												"opacity-0 group-hover:opacity-100": profile,
-											},
-										)}
-									/>
+									{isUploading ? (
+										<div className="absolute inset-0 bg-black/40 flex justify-center items-center z-20">
+											<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+										</div>
+									) : (
+										<>
+											<Camera
+												className={clsx(
+													"text-black z-10 transition-opacity duration-300",
+													{
+														"opacity-100": !profile,
+														"opacity-0 group-hover:opacity-100": profile,
+													},
+												)}
+											/>
 
-									{profile && (
-										<div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+											{profile && (
+												<div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+											)}
+										</>
 									)}
 								</div>
 								<button
 									type="button"
-									className="border px-12 py-1 mt-3 rounded-full hover:bg-[#CAF0F8] hover:shadow-md duration-300 hover:px-6 active:scale-[.97] text-sm font-semibold"
+									className="border px-12 py-1 mt-3 rounded-full hover:bg-[#CAF0F8] hover:shadow-md duration-300 hover:px-6 active:scale-[.97] text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:px-12 disabled:hover:bg-transparent"
 									onClick={() => handleUploadClick()}
+									disabled={isUploading}
 								>
-									Upload photo
+									{isUploading ? "Uploading..." : "Upload photo"}
 								</button>
 								<div className="mt-10 font-bold text-2xl">{userData.email}</div>
 								<div className="font-semibold text-lg">{userData.id}</div>
@@ -376,11 +415,21 @@ export default function ProfilePage(): React.JSX.Element {
 							<div className="flex flex-row items-center w-full justify-end mt-5">
 								<button
 									type="button"
-									className="border px-5 py-2 rounded-xl bg-[#CAF0F8] hover:bg-[#b3f2ff] hover:shadow-md duration-300 active:scale-[.97] text-sm font-semibold flex flex-row items-center gap-2"
+									className="border px-5 py-2 rounded-xl bg-[#CAF0F8] hover:bg-[#b3f2ff] hover:shadow-md duration-300 active:scale-[.97] text-sm font-semibold flex flex-row items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
 									onClick={() => handleAboutSubmit()}
+									disabled={isSaving}
 								>
-									<Save />
-									Save
+									{isSaving ? (
+										<>
+											<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black"></div>
+											Saving...
+										</>
+									) : (
+										<>
+											<Save size={18} />
+											Save
+										</>
+									)}
 								</button>
 							</div>
 
