@@ -48,6 +48,8 @@ model FirstYearUser {
 
   syuser                FirstYearUserAndSecondYearUserJoiner[]
 
+  deprecated            Boolean           @default(false)
+
   created_at            DateTime          @default(now())
   updated_at            DateTime          @updatedAt
 }
@@ -85,6 +87,8 @@ model SecondYearUser {
   syuser_lastname     String                @db.VarChar(50)
   syuser_email        String                @unique @db.VarChar(50)
   syuser_profile_key  String? 
+
+  deprecated          Boolean               @default(false)
 
   sycontact           SecondYearContact[]
   joiner_user         SecondYearUserAndUserJoiner[]
