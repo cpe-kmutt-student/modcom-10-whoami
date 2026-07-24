@@ -175,7 +175,7 @@ export default function Hint() {
 		if (shouldShowIntro) {
 			const timer = setTimeout(() => {
 				setHasShownAnnotationIntro(true);
-			}, 3500);
+			}, 5000);
 			return () => clearTimeout(timer);
 		}
 	}, [shouldShowIntro]);
