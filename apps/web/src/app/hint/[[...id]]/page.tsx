@@ -118,9 +118,10 @@ export default function Hint() {
 		isValid ? rawId : null,
 	);
 	const [isFlipped, setIsFlipped] = useState(false);
+	const [hasShownAnnotationIntro, setHasShownAnnotationIntro] = useState(false);
 
 	const router = useRouter();
-	const { studentData, markHintAsOpened } = useUser();
+	const { studentData, markHintAsOpened, user } = useUser();
 
 	const hints = studentData?.hints;
 
@@ -159,13 +160,27 @@ export default function Hint() {
 		return () => window.removeEventListener("popstate", handlePopState);
 	}, []);
 
-	if (isChecking) return null;
-
 	const unopenedHintEntry = Object.entries(hints || {}).find(
 		([id, hint]) => hint !== null && hint.isOpen === false,
 	);
 	const unopenedHintId = unopenedHintEntry ? unopenedHintEntry[0] : null;
 	const unopenedHint = unopenedHintEntry ? unopenedHintEntry[1] : null;
+
+	const shouldShowIntro =
+		unopenedHintId === "1" &&
+		!!studentData?.annotation &&
+		!hasShownAnnotationIntro;
+
+	useEffect(() => {
+		if (shouldShowIntro) {
+			const timer = setTimeout(() => {
+				setHasShownAnnotationIntro(true);
+			}, 3500);
+			return () => clearTimeout(timer);
+		}
+	}, [shouldShowIntro]);
+
+	if (isChecking) return null;
 
 	const availableHints = Object.entries(hints || {})
 		.filter(([id, hint]) => hint !== null)
@@ -188,8 +203,9 @@ export default function Hint() {
 		window.history.pushState(null, "", `/hint`);
 	};
 
-	const showBox = !activeHintId && unopenedHintId && unopenedHint;
-	const showGrid = !activeHintId && !unopenedHintId;
+	const showBox =
+		!activeHintId && unopenedHintId && unopenedHint && !shouldShowIntro;
+	const showGrid = !activeHintId && !unopenedHintId && !shouldShowIntro;
 
 	return (
 		<LayoutGroup>
@@ -197,6 +213,22 @@ export default function Hint() {
 				className={`w-full bg-blue-50 relative selection:bg-quirky selection:text-blue-900 ${!showGrid ? "h-[100dvh] overflow-hidden" : "min-h-[100dvh]"}`}
 			>
 				<code className="hidden">hint: แน่จริงก็หาให้เจอสิ จาก dev ท่านหนึ่ง</code>
+
+				<AnimatePresence>
+					{shouldShowIntro && (
+						<motion.div
+							initial={{ opacity: 0, y: 30 }}
+							animate={{ opacity: 1, y: 0 }}
+							exit={{ opacity: 0, y: -30 }}
+							transition={{ duration: 1, ease: "easeOut" }}
+							className="fixed inset-0 z-50 flex items-center justify-center bg-blue-50 px-8 pointer-events-none"
+						>
+							<h1 className="text-xl md:text-2xl text-blue-900 font-mali font-bold text-center leading-relaxed">
+								{studentData?.annotation}
+							</h1>
+						</motion.div>
+					)}
+				</AnimatePresence>
 
 				{showBox && (
 					<div className="fixed inset-0 z-40">
@@ -294,8 +326,9 @@ export default function Hint() {
 						</Button>
 					</motion.div>
 
-					<footer className="absolute w-full text-center bottom-3 text-xs text-blue-900/40 z-20 font-mali">
-						©2026 CPE39. All rights reserved.
+					<footer className="absolute w-full text-center bottom-3 text-xs text-blue-900/40 z-20 font-mali flex flex-col">
+						<div className="mb-5 px-5">{studentData?.annotation}</div>
+						<div>©2026 CPE39. All rights reserved.</div>
 					</footer>
 				</motion.div>
 
