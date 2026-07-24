@@ -9,6 +9,7 @@ import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import AdminAboutUpdateModal from "../../../components/AdminAboutUpdateModal";
 import AdminHintUpdateModal from "../../../components/AdminHintUpdateModal";
+import AdminProfileUpdateModal from "../../../components/AdminProfileUpdateModal";
 
 const getDepartmentColor = (dept: string) => {
 	switch (dept?.toUpperCase()) {
@@ -44,9 +45,11 @@ export default function AdminPage() {
 		contacts: { platform: string; value: string }[];
 	} | null>(null);
 
-	const fileInputRef = useRef<HTMLInputElement>(null);
-	const [uploadingUserId, setUploadingUserId] = useState<string | null>(null);
-	const [isUploadingProfile, setIsUploadingProfile] = useState(false);
+	const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+	const [selectedProfile, setSelectedProfile] = useState<{
+		syUserId: string;
+		initialProfileUrl: string | null;
+	} | null>(null);
 
 	const fetchData = async () => {
 		try {
@@ -103,41 +106,12 @@ export default function AdminPage() {
 		setIsAboutModalOpen(true);
 	};
 
-	const handleProfileClick = (syUserId: string) => {
-		setUploadingUserId(syUserId);
-		fileInputRef.current?.click();
-	};
-
-	const handleProfileFileChange = async (
-		e: React.ChangeEvent<HTMLInputElement>,
-	) => {
-		const file = e.target.files?.[0];
-		if (!file || !uploadingUserId) return;
-
-		try {
-			setIsUploadingProfile(true);
-			const formData = new FormData();
-			formData.append("file", file);
-			formData.append("syUserId", uploadingUserId);
-
-			axios.defaults.withCredentials = true;
-			await axios.post(
-				`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/_/admin/sy/update/profile`,
-				formData,
-				{ headers: { "Content-Type": "multipart/form-data" } },
-			);
-
-			await fetchData();
-		} catch (e) {
-			console.error("Failed to update profile", e);
-			alert("Failed to update profile image");
-		} finally {
-			setUploadingUserId(null);
-			setIsUploadingProfile(false);
-			if (fileInputRef.current) {
-				fileInputRef.current.value = "";
-			}
-		}
+	const handleOpenProfileModal = (syuser: any) => {
+		setSelectedProfile({
+			syUserId: syuser.syuser_id,
+			initialProfileUrl: syuser.syuser_profile_url || null,
+		});
+		setIsProfileModalOpen(true);
 	};
 
 	// Filter data based on search and incomplete status
@@ -276,17 +250,9 @@ export default function AdminPage() {
 													<td className="p-4">
 														<div className="flex items-center gap-4">
 															<div
-																onClick={() =>
-																	handleProfileClick(syuser.syuser_id)
-																}
+																onClick={() => handleOpenProfileModal(syuser)}
 																className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden flex-shrink-0 bg-gray-200 border border-gray-300 shadow-sm cursor-pointer hover:opacity-80 active:scale-95 transition-all group"
 															>
-																{isUploadingProfile &&
-																	uploadingUserId === syuser.syuser_id && (
-																		<div className="absolute inset-0 z-10 bg-black/50 flex items-center justify-center">
-																			<div className="w-4 h-4 border-2 border-white border-b-transparent rounded-full animate-spin" />
-																		</div>
-																	)}
 																<div className="absolute inset-0 z-10 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-[10px] font-medium">
 																	Edit
 																</div>
@@ -547,13 +513,16 @@ export default function AdminPage() {
 				/>
 			)}
 
-			<input
-				type="file"
-				ref={fileInputRef}
-				className="hidden"
-				onChange={handleProfileFileChange}
-				accept="image/*"
-			/>
+			{selectedProfile && (
+				<AdminProfileUpdateModal
+					isOpen={isProfileModalOpen}
+					onOpen={() => setIsProfileModalOpen(true)}
+					onClose={() => setIsProfileModalOpen(false)}
+					reload={fetchData}
+					syUserId={selectedProfile.syUserId}
+					initialProfileUrl={selectedProfile.initialProfileUrl}
+				/>
+			)}
 		</div>
 	);
 }
