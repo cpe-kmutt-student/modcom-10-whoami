@@ -70,12 +70,12 @@ export default function AdminPage() {
 			}
 			console.error("Fetch Admin Data Fail: ", e);
 			// Fallback to mock data if API fails
-			try {
-				const mockData = await import("./mock.json");
-				setData(mockData.default);
-			} catch (mockErr) {
-				console.error("Mock data fallback failed", mockErr);
-			}
+			// try {
+			// 	const mockData = await import("./mock.json");
+			// 	setData(mockData.default);
+			// } catch (mockErr) {
+			// 	console.error("Mock data fallback failed", mockErr);
+			// }
 		} finally {
 			setLoading(false);
 		}
