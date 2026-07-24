@@ -12,6 +12,9 @@ export class FySyContactService {
 	async getAllContact() {
 		try {
 			const getAllContact = await this.prisma.client.secondYearUser.findMany({
+				where: {
+					deprecated: false,
+				},
 				orderBy: {
 					syuser_firstname: "asc",
 				},
