@@ -46,6 +46,8 @@ const envSchema = z.object({
 	API_EMAIL_USER: z.email(),
 	API_EMAIL_PASS: z.string().min(1),
 	API_EMAIL_FROM: z.string().min(1),
+
+	API_ADMIN_SUPERUSER_ID: z.string().transform((v) => v.split(",")),
 });
 
 const result = envSchema.safeParse(process.env);
@@ -113,6 +115,9 @@ export const config = {
 			password: env.API_EMAIL_PASS,
 			secure: false,
 			from: env.API_EMAIL_FROM,
+		},
+		permission: {
+			superUserIds: env.API_ADMIN_SUPERUSER_ID,
 		},
 	},
 } as const;
