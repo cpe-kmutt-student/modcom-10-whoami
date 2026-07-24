@@ -633,6 +633,34 @@ class PrismaSeed {
 			console.log(e);
 		}
 	}
+
+	async seedGetFyNoHint() {
+		try {
+			const getFyNoHint = await prisma.firstYearUser.findMany({
+				where: {
+					fyquest: {
+						none: {},
+					},
+				},
+				select: {
+					fyuser_id: true,
+					syuser: {
+						select: {
+							syuser: {
+								select: {
+									syuser_nickname: true,
+								},
+							},
+						},
+					},
+				},
+			});
+
+			console.table(getFyNoHint);
+		} catch (e) {
+			console.log(e);
+		}
+	}
 }
 
 // Run seed
@@ -641,6 +669,8 @@ const prismaSeed = new PrismaSeed(prisma, adapter);
 // prismaSeed.seedSyProfileImage();
 // prismaSeed.seedSyContact();
 // prismaSeed.seedFyHint1();
+
+prismaSeed.seedGetFyNoHint();
 
 // prismaSeed.seedMapFySyReg();
 // prismaSeed.deleteMapFySy();
