@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./docs/modcom-Logo.png" alt="ModCom 10 Logo" width="300"/>
+  <img src="./docs/modcom-logo.png" alt="ModCom 10 Logo" width="300"/>
 
 <h1>⚽️ ModCom 10 - WhoAmI 🧐</h1>
 
