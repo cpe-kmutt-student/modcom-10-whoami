@@ -1,0 +1,74 @@
+
+services:
+  # traefik:
+  #   image: traefik:latest
+  #   restart: unless-stopped
+  #   command:
+  #     - "--api.insecure=true"
+  #     - "--providers.docker=true"
+  #     - "--providers.docker.exposedbydefault=false"
+  #     - "--entryPoints.web.address=:80"
+  #   ports:
+  #     - "8030:80"
+  #     - "8080:8080"
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #   networks:
+  #     - internal
+
+  api:
+    build:
+      context: .
+      dockerfile: ./apps/api/Dockerfile
+    env_file:
+      - .env
+    image: mentor-mentee-api:local
+    ports: 
+      - "3010:3010"
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+      args:
+        - NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}
+        - NEXT_PUBLIC_SERVER_URL=${NEXT_PUBLIC_SERVER_URL}
+        - NEXT_PUBLIC_BACKEND_BASE_URL=${NEXT_PUBLIC_BACKEND_BASE_URL}
+        - NEXT_PUBLIC_USE_MOCK=${NEXT_PUBLIC_USE_MOCK}
+        - NEXT_PUBLIC_MENTOR_BETTERAUTH_CALLBACK_URL=${NEXT_PUBLIC_MENTOR_BETTERAUTH_CALLBACK_URL}
+        - NEXT_PUBLIC_MENTOR_BETTERAUTH_SERVER_URL=${NEXT_PUBLIC_MENTOR_BETTERAUTH_SERVER_URL}
+    env_file:
+      - .env
+    image: mentor-mentee-web:local
+    ports: 
+      - "3000:3000"
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_started
+
+  mentor:
+    build:
+      context: .
+      dockerfile: ./apps/mentor/Dockerfile
+      args:
+        - NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}
+        - NEXT_PUBLIC_SERVER_URL=${NEXT_PUBLIC_SERVER_URL}
+        - NEXT_PUBLIC_BACKEND_BASE_URL=${NEXT_PUBLIC_BACKEND_BASE_URL}
+        - NEXT_PUBLIC_USE_MOCK=${NEXT_PUBLIC_USE_MOCK}
+        - NEXT_PUBLIC_MENTOR_BETTERAUTH_CALLBACK_URL=${NEXT_PUBLIC_MENTOR_BETTERAUTH_CALLBACK_URL}
+        - NEXT_PUBLIC_MENTOR_BETTERAUTH_SERVER_URL=${NEXT_PUBLIC_MENTOR_BETTERAUTH_SERVER_URL}
+    env_file:
+      - .env
+    image: mentor-mentee-mentor:local
+    ports: 
+      - "3005:3005"
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_started
+
+networks:
+  internal:
+    driver: bridge

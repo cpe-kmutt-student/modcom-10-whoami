@@ -30,8 +30,14 @@
 		"db:seed": {
 			"cache": false
 		},
+		"clean": {
+			"cache": false
+		},
 		"generate": {
 			"dependsOn": ["^generate"],
+			"cache": false
+		},
+		"email:dev": {
 			"cache": false
 		}
 	}

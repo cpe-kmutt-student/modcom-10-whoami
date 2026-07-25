@@ -7,19 +7,23 @@
 		".": {
 			"types": "./dist/client.d.ts",
 			"default": "./dist/client.js"
+		},
+		"./prisma": {
+			"types": "./dist/prisma.d.ts",
+			"default": "./dist/prisma.js"
 		}
 	},
 	"scripts": {
-		"db:migrate:deploy": "prisma migrate deploy",
-		"db:migrate:dev": "prisma migrate dev && prisma generate",
+		"clean": "rimraf dist",
+		"db:migrate:deploy": "dotenv -e ../../.env -- prisma migrate deploy",
+		"db:migrate:dev": "dotenv -e ../../.env -- prisma migrate dev && prisma generate",
 		"db:push": "prisma db push",
-		"db:seed": "tsx src/seed.ts",
+		"db:seed": "prisma db seed",
 		"dev": "tsup src/* --watch --dts --external ../generated/client",
 		"build": "tsc",
 		"format": "prisma format",
 		"generate": "prisma generate",
 		"lint": "eslint . --max-warnings 0",
-		"prebuild": "npm run generate",
 		"predev": "npm run generate",
 		"studio": "prisma studio"
 	},
@@ -34,10 +38,10 @@
 		"typescript": "^5.9.2"
 	},
 	"dependencies": {
-		"@repo/config": "workspace:*",
 		"@prisma/adapter-pg": "^7.8.0",
 		"@prisma/client": "^7.8.0",
 		"@prisma/client-runtime-utils": "^7.8.0",
+		"@repo/config": "workspace:*",
 		"pg": "^8.22.0"
 	}
 }

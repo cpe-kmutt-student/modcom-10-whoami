@@ -1,3 +1,5 @@
 generated
 
 /src/generated/prisma
+
+/src/seed/*
