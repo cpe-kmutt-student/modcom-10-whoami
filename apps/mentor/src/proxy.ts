@@ -19,11 +19,18 @@ export async function proxy(request: NextRequest) {
 	const isLoginPage = request.nextUrl.pathname.startsWith("/login");
 
 	if (!sessionToken && !isLoginPage) {
-		return NextResponse.redirect(new URL("/login", request.url));
+		const loginUrl = new URL("/login", request.url);
+		loginUrl.searchParams.set(
+			"callback",
+			request.nextUrl.pathname + request.nextUrl.search,
+		);
+		return NextResponse.redirect(loginUrl);
 	}
 
 	if (sessionToken && isLoginPage) {
-		return NextResponse.redirect(new URL("/profile", request.url));
+		const callbackUrl =
+			request.nextUrl.searchParams.get("callback") || "/profile";
+		return NextResponse.redirect(new URL(callbackUrl, request.url));
 	}
 
 	if (sessionToken && request.nextUrl.pathname.endsWith("/")) {

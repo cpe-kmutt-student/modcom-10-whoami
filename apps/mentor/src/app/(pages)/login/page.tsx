@@ -14,9 +14,16 @@ export default function LoginPage(): React.JSX.Element {
 
 	const handleMicrosoftSignIn = async () => {
 		setIsRedirecting(true);
+		const searchParams = new URLSearchParams(window.location.search);
+		const callbackUrlParam = searchParams.get("callback");
+		const callbackUrl =
+			callbackUrlParam && callbackUrlParam.startsWith("/")
+				? callbackUrlParam
+				: "/profile";
+
 		await signIn.social({
 			provider: "microsoft",
-			callbackURL: `${window.location.origin}/profile`, // Use absolute URL to redirect back to frontend
+			callbackURL: `${window.location.origin}${callbackUrl}`,
 		});
 	};
 
@@ -24,7 +31,7 @@ export default function LoginPage(): React.JSX.Element {
 		<>
 			<div className="mx-auto container w-full px-5">
 				<div className="flex flex-row items-center justify-center min-h-screen">
-					<div className="border shadow-2xl rounded-3xl p-10 flex flex-col items-center">
+					<div className="border shadow-2xl rounded-3xl p-10 flex flex-col items-center bg-white opacity-95">
 						<Image src={Logo} alt="logo" className="w-28 h-28" />
 
 						<div className="font-bold text-2xl mt-6">Mentor Profile</div>
