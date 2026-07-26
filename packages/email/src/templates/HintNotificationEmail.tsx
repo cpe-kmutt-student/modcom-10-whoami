@@ -115,7 +115,7 @@ export default function NewHintEmail({
 							<Text className="m-0 text-lg font-bold text-black">ModCom10</Text>
 
 							<Text className="mt-3 text-sm leading-6 text-black">
-								กิจกรรมตามหาสายรหัสสำหรับน้องๆ CPE#40
+								กิจกรรมตามหาสายรหัสสำหรับน้องๆ CPE Freshy
 							</Text>
 
 							<Section className="mt-6 text-xs text-black flex flex-col items-center">
