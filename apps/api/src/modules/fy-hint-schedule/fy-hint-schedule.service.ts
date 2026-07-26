@@ -15,9 +15,9 @@ export class FyHintScheduleService implements OnModuleInit {
 	private readonly logger = new Logger(FyHintScheduleService.name);
 
 	onModuleInit() {
-		this.addJob("hint_1_notification", new Date(config.backend.period.quest1.startDate), () => this.processHint1Email());
-		this.addJob("hint_2_notification", new Date(config.backend.period.quest2.startDate), () => this.processHint2Email());
-		this.addJob("hint_3_notification", new Date(config.backend.period.quest3.startDate), () => this.processHint3Email());
+		// this.addJob("hint_1_notification", new Date(config.backend.period.quest1.startDate), () => this.processHint1Email());
+		// this.addJob("hint_2_notification", new Date(config.backend.period.quest2.startDate), () => this.processHint2Email());
+		// this.addJob("hint_3_notification", new Date(config.backend.period.quest3.startDate), () => this.processHint3Email());
 	}
 
 	private addJob(name: string, date: Date, callback: () => Promise<void>) {
