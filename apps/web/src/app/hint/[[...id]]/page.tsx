@@ -326,7 +326,7 @@ export default function Hint() {
 						</Button>
 					</motion.div>
 
-					<footer className="absolute w-full text-center bottom-3 text-xs text-blue-900/40 z-20 font-mali flex flex-col">
+					<footer className="absolute w-full text-center bottom-3 text-xs text-blue-900/40 z-[-10] font-mali flex flex-col">
 						<div className="mb-5 px-5">{studentData?.annotation}</div>
 						<div>©2026 CPE39. All rights reserved.</div>
 					</footer>
