@@ -15,6 +15,9 @@ const nextConfig: NextConfig = {
 			},
 		],
 	},
+	allowedDevOrigins: [
+		"https://www.clarity.ms",
+	],
 };
 
 import createNextIntlPlugin from "next-intl/plugin";
