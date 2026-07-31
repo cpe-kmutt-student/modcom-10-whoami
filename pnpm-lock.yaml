@@ -514,6 +514,9 @@ importers:
       '@repo/config':
         specifier: workspace:*
         version: link:../config
+      '@repo/storage':
+        specifier: workspace:*
+        version: link:../storage
       pg:
         specifier: ^8.22.0
         version: 8.22.0
