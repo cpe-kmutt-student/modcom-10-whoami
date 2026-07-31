@@ -13,10 +13,10 @@ RUN pnpm install --frozen-lockfile
 # Build the environment 
 # will move to entrypoint package and API
 RUN pnpm --filter @repo/config run build
+RUN pnpm --filter @repo/storage run build
 RUN pnpm --filter @repo/database run generate
 RUN pnpm --filter @repo/database run build
 RUN pnpm --filter @repo/auth run build
-RUN pnpm --filter @repo/storage run build
 RUN pnpm --filter @repo/email run build
 RUN pnpm --filter api run build
 
