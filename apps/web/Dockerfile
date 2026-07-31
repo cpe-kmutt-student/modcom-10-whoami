@@ -27,6 +27,7 @@ ENV NEXT_PUBLIC_MICROSOFT_CLARITY="http://placeholder-next-public-microsoft-clar
 
 
 RUN pnpm --filter @repo/config run build
+RUN pnpm --filter @repo/storage run build
 RUN pnpm --filter @repo/database run generate
 RUN pnpm --filter @repo/database run build
 RUN pnpm --filter @repo/auth run build

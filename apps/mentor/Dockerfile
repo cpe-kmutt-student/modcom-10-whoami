@@ -25,6 +25,7 @@ ENV NEXT_PUBLIC_MENTOR_BETTERAUTH_CALLBACK_URL="http://placeholder-next-public-m
 ENV NEXT_PUBLIC_MENTOR_BETTERAUTH_SERVER_URL="http://placeholder-next-public-mentor-betterauth-server-url.invalid"
 
 RUN pnpm --filter @repo/config run build
+RUN pnpm --filter @repo/storage run build
 RUN pnpm --filter @repo/database run generate
 RUN pnpm --filter @repo/database run build
 RUN pnpm --filter @repo/auth run build
