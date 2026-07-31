@@ -3,6 +3,7 @@ import path from "node:path";
 import process from "node:process";
 import type { PrismaPg } from "@prisma/adapter-pg";
 import { config } from "@repo/config";
+import { renameFile } from "@repo/storage";
 import type { IFirstYear } from "./@types/firstYear.type";
 import type {
 	HDSMapType,
@@ -661,6 +662,49 @@ class PrismaSeed {
 			console.log(e);
 		}
 	}
+
+	async ChangeProfileImageName() {
+		try {
+			const getAllSyUser = await prisma.secondYearUser.findMany();
+
+			const getRealProfile = getAllSyUser.filter(
+				(pr) => pr.syuser_profile_key !== "default_user_profile.png",
+			);
+
+			for (const pr of getRealProfile) {
+				const fileKey = `profile_f_${new Date().getTime()}`;
+				const userId = pr.syuser_id;
+
+				if (!pr.syuser_profile_key) continue;
+
+				await renameFile(
+					config.backend.s3.bucket,
+					pr.syuser_profile_key,
+					fileKey,
+				);
+
+				await prisma.secondYearUser.update({
+					where: {
+						syuser_id: userId,
+					},
+					data: {
+						syuser_profile_key: fileKey,
+					},
+				});
+
+				console.log(
+					"Updated:",
+					pr.syuser_id,
+					":",
+					pr.syuser_profile_key,
+					"->",
+					fileKey,
+				);
+			}
+		} catch (e) {
+			console.log(e);
+		}
+	}
 }
 
 // Run seed
@@ -670,7 +714,9 @@ const prismaSeed = new PrismaSeed(prisma, adapter);
 // prismaSeed.seedSyContact();
 // prismaSeed.seedFyHint1();
 
-prismaSeed.seedGetFyNoHint();
+// prismaSeed.seedGetFyNoHint();
+
+prismaSeed.ChangeProfileImageName();
 
 // prismaSeed.seedMapFySyReg();
 // prismaSeed.deleteMapFySy();

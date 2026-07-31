@@ -42,6 +42,7 @@
 		"@prisma/client": "^7.8.0",
 		"@prisma/client-runtime-utils": "^7.8.0",
 		"@repo/config": "workspace:*",
+		"@repo/storage": "workspace:*",
 		"pg": "^8.22.0"
 	}
 }
