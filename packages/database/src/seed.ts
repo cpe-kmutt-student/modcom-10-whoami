@@ -11,6 +11,7 @@ import type {
 	RegMapType,
 } from "./@types/MapFySy.type";
 import type { ReportResponse } from "./@types/ReportResponse.type";
+import type { ReportResponse2 } from "./@types/ReportResponse2.type";
 import type { ISyFormResponse } from "./@types/SyFormResponse.type";
 import {
 	adapter,
@@ -38,6 +39,7 @@ class PrismaSeed {
 	private reg_fysy_map: RegMapType = [];
 
 	private sy_form_response: ISyFormResponse = [];
+	private report_response_2: ReportResponse2 = [];
 
 	constructor(prisma: PrismaClient, adapter: PrismaPg) {
 		this.adapter = adapter;
@@ -97,6 +99,11 @@ class PrismaSeed {
 				"utf8",
 			);
 
+			const loadReportResponse2 = fs.readFileSync(
+				path.join(process.cwd(), "/src/seed/output_hints_2_3.json"),
+				"utf8",
+			);
+
 			this.hds_68 = JSON.parse(loadHDS68);
 			this.inter_68 = JSON.parse(loadInter68);
 			this.regular_68 = JSON.parse(loadRegular68);
@@ -110,6 +117,8 @@ class PrismaSeed {
 			this.reg_fysy_map = JSON.parse(loadFySyMapReg);
 
 			this.sy_form_response = JSON.parse(loadSyFormResponse);
+
+			this.report_response_2 = JSON.parse(loadReportResponse2);
 		} catch (e) {
 			console.log(e);
 		}
@@ -663,6 +672,43 @@ class PrismaSeed {
 		}
 	}
 
+	async seedGetFyNoHint2And3() {
+		try {
+			const getFyNoHint = await prisma.firstYearUser.findMany({
+				where: {
+					fyquest: {
+						none: {
+							OR: [
+								{
+									fyquest_index: 2,
+								},
+								{
+									fyquest_index: 3,
+								},
+							],
+						},
+					},
+				},
+				select: {
+					fyuser_id: true,
+					syuser: {
+						select: {
+							syuser: {
+								select: {
+									syuser_nickname: true,
+								},
+							},
+						},
+					},
+				},
+			});
+
+			console.table(getFyNoHint);
+		} catch (e) {
+			console.log(e);
+		}
+	}
+
 	async ChangeProfileImageName() {
 		try {
 			const getAllSyUser = await prisma.secondYearUser.findMany();
@@ -705,6 +751,106 @@ class PrismaSeed {
 			console.log(e);
 		}
 	}
+
+	async seedFyHint2() {
+		try {
+			const getFyUser = await prisma.firstYearUser.findMany({
+				include: {
+					fyquest: true,
+					syuser: {
+						include: {
+							syuser: true,
+						},
+					},
+				},
+			});
+			const fyUserNoHint = getFyUser.filter(
+				(f) => !f.fyquest.find((q) => q.fyquest_index === 2),
+			);
+
+			let totalSuccess = 0;
+			let totalSkip = 0;
+			const total = fyUserNoHint.length;
+
+			for (const fyUser of fyUserNoHint) {
+				const pRaHud = fyUser.syuser[0]?.syuser_id;
+
+				const getPrahudHint = this.report_response_2.find(
+					(sy) => sy.studentId === pRaHud,
+				);
+
+				if (!getPrahudHint) {
+					totalSkip++;
+					continue;
+				}
+
+				const createHint = await prisma.firstYearQuest.create({
+					data: {
+						fyuser_id: fyUser.fyuser_id,
+						fyquest_index: 2,
+						fyquest_detail: getPrahudHint.hint2,
+					},
+				});
+
+				totalSuccess++;
+			}
+
+			console.log(`Total skip : ${totalSkip}`);
+			console.log(`Success : ${totalSuccess} / ${total}`);
+		} catch (e) {
+			console.log(e);
+		}
+	}
+
+	async seedFyHint3() {
+		try {
+			const getFyUser = await prisma.firstYearUser.findMany({
+				include: {
+					fyquest: true,
+					syuser: {
+						include: {
+							syuser: true,
+						},
+					},
+				},
+			});
+			const fyUserNoHint = getFyUser.filter(
+				(f) => !f.fyquest.find((q) => q.fyquest_index === 3),
+			);
+
+			let totalSuccess = 0;
+			let totalSkip = 0;
+			const total = fyUserNoHint.length;
+
+			for (const fyUser of fyUserNoHint) {
+				const pRaHud = fyUser.syuser[0]?.syuser_id;
+
+				const getPrahudHint = this.report_response_2.find(
+					(sy) => sy.studentId === pRaHud,
+				);
+
+				if (!getPrahudHint) {
+					totalSkip++;
+					continue;
+				}
+
+				const createHint = await prisma.firstYearQuest.create({
+					data: {
+						fyuser_id: fyUser.fyuser_id,
+						fyquest_index: 3,
+						fyquest_detail: getPrahudHint.hint3,
+					},
+				});
+
+				totalSuccess++;
+			}
+
+			console.log(`Total skip : ${totalSkip}`);
+			console.log(`Success : ${totalSuccess} / ${total}`);
+		} catch (e) {
+			console.log(e);
+		}
+	}
 }
 
 // Run seed
@@ -714,9 +860,12 @@ const prismaSeed = new PrismaSeed(prisma, adapter);
 // prismaSeed.seedSyContact();
 // prismaSeed.seedFyHint1();
 
-// prismaSeed.seedGetFyNoHint();
+prismaSeed.seedGetFyNoHint2And3();
 
-prismaSeed.ChangeProfileImageName();
+// prismaSeed.ChangeProfileImageName();
+
+// prismaSeed.seedFyHint2();
+// prismaSeed.seedFyHint3();
 
 // prismaSeed.seedMapFySyReg();
 // prismaSeed.deleteMapFySy();
