@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
 				hostname: "s3.aboutnon.in.th",
 				pathname: "/**",
 			},
+			{
+				protocol: "https",
+				hostname: "whoami-s3.aboutnon.in.th",
+				pathname: "/**",
+			},
 		],
 	},
 };
