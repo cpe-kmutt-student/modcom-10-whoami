@@ -25,6 +25,8 @@ ENV NEXT_PUBLIC_MENTOR_BETTERAUTH_CALLBACK_URL="http://placeholder-next-public-m
 ENV NEXT_PUBLIC_MENTOR_BETTERAUTH_SERVER_URL="http://placeholder-next-public-mentor-betterauth-server-url.invalid"
 ENV NEXT_PUBLIC_MICROSOFT_CLARITY="http://placeholder-next-public-microsoft-clarity.invalid"
 
+ENV NEXT_PUBLIC_UMAMI_URL="http://placeholder-next-public-umami-url.invalid"
+ENV NEXT_PUBLIC_UMAMI_WEBSITE_ID="http://placeholder-next-public-umami-website-id.invalid"
 
 RUN pnpm --filter @repo/config run build
 RUN pnpm --filter @repo/storage run build

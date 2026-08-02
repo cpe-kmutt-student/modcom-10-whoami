@@ -7,6 +7,7 @@ import UtilityCluster from "@/components/UtilityCluster";
 import { ExperienceProvider } from "@/context/ExperienceContext";
 import { UserProvider } from "@/context/UserContext";
 import MicrosoftClarity from "./metrics/MicrosoftClarity";
+import UmamiAnalytics from "./metrics/UmamiAnalytics";
 
 const mali = Mali({
 	subsets: ["latin", "thai"],
@@ -74,8 +75,9 @@ export default function RootLayout({
 				<NextIntlClientProvider>
 					<ExperienceProvider>
 						<UserProvider>{children}</UserProvider>
-						
+
 						<MicrosoftClarity />
+						<UmamiAnalytics />
 						<UtilityCluster />
 						<CookieModal />
 					</ExperienceProvider>
