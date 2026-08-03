@@ -851,6 +851,72 @@ class PrismaSeed {
 			console.log(e);
 		}
 	}
+
+	async seedFyNoClue2() {
+		try {
+			const getFy = await prisma.firstYearUser.findMany({
+				where: {
+					deprecated: false,
+				},
+				include: {
+					fyquest: true,
+				},
+			});
+
+			const filterNoClue2 = getFy.filter(
+				(fy) => !fy.fyquest.find((q) => q.fyquest_index === 2),
+			);
+
+			let count = 0;
+			for (const fyNo2 of filterNoClue2) {
+				await prisma.firstYearQuest.create({
+					data: {
+						fyquest_index: 2,
+						fyuser_id: fyNo2.fyuser_id,
+						fyquest_detail: "no_clue_naja.webp",
+					},
+				});
+				count++;
+			}
+
+			console.log(count, "/", filterNoClue2.length);
+		} catch (e) {
+			console.log(e);
+		}
+	}
+
+	async seedFyNoClue3() {
+		try {
+			const getFy = await prisma.firstYearUser.findMany({
+				where: {
+					deprecated: false,
+				},
+				include: {
+					fyquest: true,
+				},
+			});
+
+			const filterNoClue3 = getFy.filter(
+				(fy) => !fy.fyquest.find((q) => q.fyquest_index === 3),
+			);
+
+			let count = 0;
+			for (const fyNo2 of filterNoClue3) {
+				await prisma.firstYearQuest.create({
+					data: {
+						fyquest_index: 3,
+						fyuser_id: fyNo2.fyuser_id,
+						fyquest_detail: "no_clue_naja.webp",
+					},
+				});
+				count++;
+			}
+
+			console.log(count, "/", filterNoClue3.length);
+		} catch (e) {
+			console.log(e);
+		}
+	}
 }
 
 // Run seed
@@ -860,12 +926,14 @@ const prismaSeed = new PrismaSeed(prisma, adapter);
 // prismaSeed.seedSyContact();
 // prismaSeed.seedFyHint1();
 
-prismaSeed.seedGetFyNoHint2And3();
+// prismaSeed.seedGetFyNoHint2And3();
 
 // prismaSeed.ChangeProfileImageName();
 
 // prismaSeed.seedFyHint2();
 // prismaSeed.seedFyHint3();
+
+prismaSeed.seedFyNoClue3();
 
 // prismaSeed.seedMapFySyReg();
 // prismaSeed.deleteMapFySy();
