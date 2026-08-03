@@ -917,6 +917,30 @@ class PrismaSeed {
 			console.log(e);
 		}
 	}
+
+	async seedUpdateHint2And3OpenFalse() {
+		try {
+			const getAllHint = await prisma.firstYearQuest.updateMany({
+				where: {
+					OR: [
+						{
+							fyquest_index: 2,
+						},
+						{
+							fyquest_index: 3,
+						},
+					],
+				},
+				data: {
+					fyquest_status_boxopen: false,
+				},
+			});
+
+			console.table(getAllHint);
+		} catch (e) {
+			console.log(e);
+		}
+	}
 }
 
 // Run seed
@@ -933,7 +957,7 @@ const prismaSeed = new PrismaSeed(prisma, adapter);
 // prismaSeed.seedFyHint2();
 // prismaSeed.seedFyHint3();
 
-prismaSeed.seedFyNoClue3();
+prismaSeed.seedUpdateHint2And3OpenFalse();
 
 // prismaSeed.seedMapFySyReg();
 // prismaSeed.deleteMapFySy();
