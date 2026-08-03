@@ -31,11 +31,11 @@ export const initializeUmami = () => {
 
 export default function UmamiAnalytics() {
 	useEffect(() => {
-		const consent = localStorage.getItem("mentormentee2026_cookie_consent");
+		// const consent = localStorage.getItem("mentormentee2026_cookie_consent");
 
-		if (consent === "all") {
-			initializeUmami();
-		}
+		// if (consent === "all") {
+		initializeUmami();
+		// }
 	}, []);
 
 	return null;
