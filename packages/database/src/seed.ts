@@ -765,7 +765,9 @@ class PrismaSeed {
 				},
 			});
 			const fyUserNoHint = getFyUser.filter(
-				(f) => !f.fyquest.find((q) => q.fyquest_index === 2),
+				(f) =>
+					!f.fyquest.find((q) => q.fyquest_index === 2) ||
+					f.fyquest.find((q) => q.fyquest_detail === "no_clue_naja.webp"),
 			);
 
 			let totalSuccess = 0;
@@ -815,7 +817,9 @@ class PrismaSeed {
 				},
 			});
 			const fyUserNoHint = getFyUser.filter(
-				(f) => !f.fyquest.find((q) => q.fyquest_index === 3),
+				(f) =>
+					!f.fyquest.find((q) => q.fyquest_index === 3) ||
+					f.fyquest.find((q) => q.fyquest_detail === "no_clue_naja.webp"),
 			);
 
 			let totalSuccess = 0;
@@ -954,10 +958,10 @@ const prismaSeed = new PrismaSeed(prisma, adapter);
 
 // prismaSeed.ChangeProfileImageName();
 
-// prismaSeed.seedFyHint2();
-// prismaSeed.seedFyHint3();
+prismaSeed.seedFyHint2();
+prismaSeed.seedFyHint3();
 
-prismaSeed.seedUpdateHint2And3OpenFalse();
+// prismaSeed.seedUpdateHint2And3OpenFalse();
 
 // prismaSeed.seedMapFySyReg();
 // prismaSeed.deleteMapFySy();
