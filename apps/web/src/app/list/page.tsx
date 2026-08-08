@@ -366,7 +366,7 @@ export default function List() {
 									<Image
 										src={pData.imageUrl}
 										alt={pData.name}
-										// unoptimized={true}
+										unoptimized
 										width={64}
 										height={64}
 										// onError={(e) => {
@@ -490,7 +490,7 @@ export default function List() {
 								<Image
 									src={selectedProfile.imageUrl}
 									alt={selectedProfile.name}
-									// unoptimized={true}
+									unoptimized
 									width={400}
 									height={400}
 									className="w-full h-auto max-h-[350px] rounded-sm object-contain "
