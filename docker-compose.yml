@@ -66,6 +66,9 @@ services:
     image: ghcr.io/imjustnon/whoami-api:staging
     expose:
       - "3010"
+    depends_on:
+      redis:
+        condition: service_started
     # labels:
     #   com.centurylinklabs.watchtower.enable: "true"
     ports: 
@@ -101,6 +104,19 @@ services:
       - "3005:3005"
     restart: unless-stopped
 
+
+  redis:
+    <<: *defaults
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
 networks:
   internal:
     driver: bridge
+
+
+volumes:
+  redis_data:
