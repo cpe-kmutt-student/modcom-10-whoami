@@ -1,5 +1,7 @@
+import { redisStorage } from "@better-auth/redis-storage";
 import { config } from "@repo/config";
 import { prisma } from "@repo/database";
+import { redisClient } from "@repo/redis";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { admin, openAPI, username } from "better-auth/plugins";
@@ -11,6 +13,9 @@ export const auth = betterAuth({
 	trustedOrigins: config.backend.allowOrigins,
 	database: prismaAdapter(prisma, {
 		provider: "postgresql",
+	}),
+	secondaryStorage: redisStorage({
+		client: redisClient,
 	}),
 	session: {
 		strategy: "database",

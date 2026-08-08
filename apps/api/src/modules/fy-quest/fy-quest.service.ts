@@ -1,4 +1,5 @@
-import { BadRequestException, ForbiddenException, HttpException, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
+import { Cache, CACHE_MANAGER } from "@nestjs/cache-manager";
+import { BadRequestException, ForbiddenException, HttpException, Inject, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
 import { config } from "@repo/config";
 import { getPreSignUrl } from "@repo/storage";
 import { Request } from "express";
@@ -7,12 +8,22 @@ import { PrismaService } from "src/core/prisma/prisma.service";
 
 @Injectable()
 export class FyQuestService {
-	constructor(private readonly prisma: PrismaService) {}
+	constructor(
+		private readonly prisma: PrismaService,
+		@Inject(CACHE_MANAGER) private cacheManager: Cache,
+	) {}
 
 	private readonly logger = new Logger(FyQuestService.name);
 
 	async getQuest(userId: string, req: Request & { questAllow: QuestAllow }) {
 		try {
+			const cacheKey = `fyquest_${userId}`;
+			const cachedData = await this.cacheManager.get(cacheKey);
+
+			if (cachedData) {
+				return cachedData; // ถ้ามีแคช คืนค่ากลับไป
+			}
+
 			const getUser = await this.prisma.client.user.findUnique({
 				where: {
 					id: userId,
@@ -50,6 +61,9 @@ export class FyQuestService {
 					};
 				}),
 			);
+
+			// เซฟข้อมูลลง Redis
+			await this.cacheManager.set(cacheKey, mapQuestImageUrl, 10 * 60 * 1000);
 
 			return mapQuestImageUrl;
 		} catch (e) {
@@ -152,6 +166,10 @@ export class FyQuestService {
 					fyquest_status_boxopen: true,
 				},
 			});
+
+			// ลบแคช น้องเปิดกล่อง สถานะเปลี่ยน
+			const cacheKey = `fyquest_${userId}`;
+			await this.cacheManager.del(cacheKey);
 
 			return updateBoxStatus;
 		} catch (e) {

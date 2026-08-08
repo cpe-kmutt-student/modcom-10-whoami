@@ -19,6 +19,10 @@ import { SyUpdateModule } from "./modules/sy-update/sy-update.module";
 import { SyJuniorHintModule } from "./modules/sy-junior-hint/sy-junior-hint.module";
 import { GbMemeModule } from "./modules/gb-meme/gb-meme.module";
 import { AdSyAccountModule } from "./modules/admin/admin.module";
+import { CacheModule } from "@nestjs/cache-manager";
+import { createKeyv } from "@keyv/redis";
+import { config } from "@repo/config";
+import { redisClient } from "@repo/redis";
 
 @Module({
 	imports: [
@@ -41,6 +45,12 @@ import { AdSyAccountModule } from "./modules/admin/admin.module";
 		SyJuniorHintModule,
 		GbMemeModule,
 		AdSyAccountModule,
+		CacheModule.registerAsync({
+			isGlobal: true,
+			useFactory: () => ({
+				stores: [createKeyv(config.backend.redis.connectionUrl)],
+			}),
+		}),
 	],
 	controllers: [AppController],
 	providers: [AppService],
