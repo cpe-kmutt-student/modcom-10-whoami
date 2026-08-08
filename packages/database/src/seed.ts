@@ -765,7 +765,9 @@ class PrismaSeed {
 				},
 			});
 			const fyUserNoHint = getFyUser.filter(
-				(f) => !f.fyquest.find((q) => q.fyquest_index === 2),
+				(f) =>
+					!f.fyquest.find((q) => q.fyquest_index === 2) ||
+					f.fyquest.find((q) => q.fyquest_detail === "no_clue_naja.webp"),
 			);
 
 			let totalSuccess = 0;
@@ -815,7 +817,9 @@ class PrismaSeed {
 				},
 			});
 			const fyUserNoHint = getFyUser.filter(
-				(f) => !f.fyquest.find((q) => q.fyquest_index === 3),
+				(f) =>
+					!f.fyquest.find((q) => q.fyquest_index === 3) ||
+					f.fyquest.find((q) => q.fyquest_detail === "no_clue_naja.webp"),
 			);
 
 			let totalSuccess = 0;
@@ -851,6 +855,96 @@ class PrismaSeed {
 			console.log(e);
 		}
 	}
+
+	async seedFyNoClue2() {
+		try {
+			const getFy = await prisma.firstYearUser.findMany({
+				where: {
+					deprecated: false,
+				},
+				include: {
+					fyquest: true,
+				},
+			});
+
+			const filterNoClue2 = getFy.filter(
+				(fy) => !fy.fyquest.find((q) => q.fyquest_index === 2),
+			);
+
+			let count = 0;
+			for (const fyNo2 of filterNoClue2) {
+				await prisma.firstYearQuest.create({
+					data: {
+						fyquest_index: 2,
+						fyuser_id: fyNo2.fyuser_id,
+						fyquest_detail: "no_clue_naja.webp",
+					},
+				});
+				count++;
+			}
+
+			console.log(count, "/", filterNoClue2.length);
+		} catch (e) {
+			console.log(e);
+		}
+	}
+
+	async seedFyNoClue3() {
+		try {
+			const getFy = await prisma.firstYearUser.findMany({
+				where: {
+					deprecated: false,
+				},
+				include: {
+					fyquest: true,
+				},
+			});
+
+			const filterNoClue3 = getFy.filter(
+				(fy) => !fy.fyquest.find((q) => q.fyquest_index === 3),
+			);
+
+			let count = 0;
+			for (const fyNo2 of filterNoClue3) {
+				await prisma.firstYearQuest.create({
+					data: {
+						fyquest_index: 3,
+						fyuser_id: fyNo2.fyuser_id,
+						fyquest_detail: "no_clue_naja.webp",
+					},
+				});
+				count++;
+			}
+
+			console.log(count, "/", filterNoClue3.length);
+		} catch (e) {
+			console.log(e);
+		}
+	}
+
+	async seedUpdateHint2And3OpenFalse() {
+		try {
+			const getAllHint = await prisma.firstYearQuest.updateMany({
+				where: {
+					OR: [
+						{
+							fyquest_index: 2,
+						},
+						{
+							fyquest_index: 3,
+						},
+					],
+				},
+				data: {
+					fyquest_status_boxopen: false,
+				},
+			});
+
+			console.table(getAllHint);
+		} catch (e) {
+			console.log(e);
+		}
+	}
 }
 
 // Run seed
@@ -860,12 +954,14 @@ const prismaSeed = new PrismaSeed(prisma, adapter);
 // prismaSeed.seedSyContact();
 // prismaSeed.seedFyHint1();
 
-prismaSeed.seedGetFyNoHint2And3();
+// prismaSeed.seedGetFyNoHint2And3();
 
 // prismaSeed.ChangeProfileImageName();
 
-// prismaSeed.seedFyHint2();
-// prismaSeed.seedFyHint3();
+prismaSeed.seedFyHint2();
+prismaSeed.seedFyHint3();
+
+// prismaSeed.seedUpdateHint2And3OpenFalse();
 
 // prismaSeed.seedMapFySyReg();
 // prismaSeed.deleteMapFySy();

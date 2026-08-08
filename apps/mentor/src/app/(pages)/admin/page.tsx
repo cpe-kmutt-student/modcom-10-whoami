@@ -261,6 +261,7 @@ export default function AdminPage() {
 																		src={syuser.syuser_profile_url}
 																		alt={`${syuser.syuser_firstname}'s profile`}
 																		fill
+																		unoptimized
 																		sizes="(max-width: 640px) 40px, 48px"
 																		className="object-cover"
 																	/>
