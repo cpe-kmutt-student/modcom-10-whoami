@@ -20,8 +20,10 @@
 		"check-types": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@better-auth/redis-storage": "^1.6.26",
 		"@repo/config": "workspace:*",
 		"@repo/database": "workspace:*",
+		"@repo/redis": "workspace:*",
 		"better-auth": "^1.6.20"
 	},
 	"devDependencies": {
