@@ -48,6 +48,8 @@ const envSchema = z.object({
 	API_EMAIL_FROM: z.string().min(1),
 
 	API_ADMIN_SUPERUSER_ID: z.string().transform((v) => v.split(",")),
+
+	API_REDIS_CONNECTION_URL: z.url(),
 });
 
 const result = envSchema.safeParse(process.env);
