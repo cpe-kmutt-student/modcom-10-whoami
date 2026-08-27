@@ -63,7 +63,7 @@ services:
 
   api:
     <<: *defaults
-    image: ghcr.io/imjustnon/whoami-api:staging
+    image: ghcr.io/imjustnon/whoami-api:latest
     expose:
       - "3010"
     depends_on:
@@ -77,7 +77,7 @@ services:
 
   web:
     <<: *defaults
-    image: ghcr.io/imjustnon/whoami-web:staging
+    image: ghcr.io/imjustnon/whoami-web:latest
     expose:
       - "3000"
     depends_on:
@@ -92,7 +92,7 @@ services:
 
   mentor:
     <<: *defaults
-    image: ghcr.io/imjustnon/whoami-mentor:staging
+    image: ghcr.io/imjustnon/whoami-mentor:latest
     expose:
       - "3005"
     depends_on:
