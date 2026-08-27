@@ -16,6 +16,14 @@ services:
   #   networks:
   #     - internal
 
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+
   api:
     build:
       context: .
@@ -26,6 +34,9 @@ services:
     ports: 
       - "3010:3010"
     restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_started
 
   web:
     build:
@@ -72,3 +83,6 @@ services:
 networks:
   internal:
     driver: bridge
+
+volumes:
+  redis_data:

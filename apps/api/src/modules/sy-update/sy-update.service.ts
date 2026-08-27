@@ -1,15 +1,19 @@
-import { ForbiddenException, HttpException, HttpStatus, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
+import { ForbiddenException, HttpException, HttpStatus, Inject, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { PrismaService } from "src/core/prisma/prisma.service";
 import { AboutDto, HintDto } from "./dto/sy-contact-update.dto";
 import { uploadFile, uploadFileOptimize } from "@repo/storage";
 import { config } from "@repo/config";
 import sharp from "sharp";
+import { Cache, CACHE_MANAGER } from "@nestjs/cache-manager";
 
 @Injectable()
 export class SyUpdateService {
 	private readonly logger: Logger = new Logger(SyUpdateService.name);
 
-	constructor(private readonly prisma: PrismaService) {}
+	constructor(
+		private readonly prisma: PrismaService,
+		@Inject(CACHE_MANAGER) private cacheManager: Cache,
+	) {}
 
 	async updateContact(userId: string, aboutDto: AboutDto) {
 		try {
@@ -94,6 +98,8 @@ export class SyUpdateService {
 					syuser_id: true,
 				},
 			});
+
+			await this.cacheManager.del("sy_contacts");
 
 			return getUpdatedContact;
 		} catch (e) {

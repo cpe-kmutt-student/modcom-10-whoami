@@ -1,15 +1,11 @@
 {
-	"name": "@repo/auth",
+	"name": "@repo/redis",
 	"version": "0.0.0",
 	"private": true,
 	"exports": {
-		"./client": {
-			"types": "./dist/client.d.ts",
-			"default": "./dist/client.js"
-		},
-		"./server": {
-			"types": "./dist/server.d.ts",
-			"default": "./dist/server.js"
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
 		}
 	},
 	"scripts": {
@@ -20,11 +16,8 @@
 		"check-types": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@better-auth/redis-storage": "^1.6.26",
 		"@repo/config": "workspace:*",
-		"@repo/database": "workspace:*",
-		"@repo/redis": "workspace:*",
-		"better-auth": "^1.6.20"
+		"ioredis": "^6.0.0"
 	},
 	"devDependencies": {
 		"@repo/eslint-config": "workspace:*",

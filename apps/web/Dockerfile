@@ -23,10 +23,17 @@ ENV NEXT_PUBLIC_BACKEND_BASE_URL="http://placeholder-next-public-backend-base-ur
 ENV NEXT_PUBLIC_USE_MOCK="http://placeholder-next-public-use-mock.invalid"
 ENV NEXT_PUBLIC_MENTOR_BETTERAUTH_CALLBACK_URL="http://placeholder-next-public-mentor-betterauth-callback-url.invalid"
 ENV NEXT_PUBLIC_MENTOR_BETTERAUTH_SERVER_URL="http://placeholder-next-public-mentor-betterauth-server-url.invalid"
+ENV NEXT_PUBLIC_MICROSOFT_CLARITY="http://placeholder-next-public-microsoft-clarity.invalid"
+ENV NEXT_PUBLIC_GOOGLE_ANALYTICS="http://placeholder-next-public-google-analytics.invalid"
+
+ENV NEXT_PUBLIC_UMAMI_URL="http://placeholder-next-public-umami-url.invalid"
+ENV NEXT_PUBLIC_UMAMI_WEBSITE_ID="http://placeholder-next-public-umami-website-id.invalid"
 
 RUN pnpm --filter @repo/config run build
+RUN pnpm --filter @repo/storage run build
 RUN pnpm --filter @repo/database run generate
 RUN pnpm --filter @repo/database run build
+RUN pnpm --filter @repo/redis run build
 RUN pnpm --filter @repo/auth run build
 RUN pnpm --filter web run build
 
